@@ -1,7 +1,7 @@
 #include <err.h>
 #include <errno.h>
 
-#include "alloc.h"
+#include "../headers/alloc.h"
 
 void *xmalloc(size_t size)
 {
