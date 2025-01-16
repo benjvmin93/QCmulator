@@ -1,16 +1,23 @@
 CC = gcc
 
-CFLAGS=-std=c99 -Wextra -Wall
-FILES=main.c
-TEST=src/utils/alloc.c src/utils/complex.c tests/test_complex.c 
-LIBTEST=-lcunit
-LIBS=-lm
+CFLAGS = -std=c99 -Wextra -Wall
+FILES = main.c
+COMPLEX_TEST = src/utils/alloc.c src/utils/complex.c tests/test_complex.c
+STATEVEC_TEST = src/utils/alloc.c src/utils/complex.c src/statevec.c tests/test_statevec.c
+LIBTEST = -lcunit
+LIBS = -lm
 
 all:
 	${CC} ${CFLAGS} -pedantic -o main ${FILES} ${LIBS}
-test:
-	${CC} -fsanitize=address -o run-tests -g ${TEST} ${LIBTEST} ${LIBS}
+
+test-complex:
+	${CC} -fsanitize=address -o run-complex-tests -g ${COMPLEX_TEST} ${LIBTEST} ${LIBS}
+
+test-statevec:
+	${CC} -fsanitize=address -o run-statevec-tests -g ${STATEVEC_TEST} ${LIBTEST} ${LIBS}
+
 debug:
 	${CC} ${CFLAGS} -fsanitize=address -o dbg -g ${FILES} ${LIBS}
+
 clean:
-	rm -f main run-tests test dbg
+	rm -f main run-complex-tests run-statevec-tests dbg
