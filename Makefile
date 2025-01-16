@@ -24,4 +24,4 @@ debug:
 	${CC} ${CFLAGS} -fsanitize=address -o dbg -g ${FILES} ${LIBS}
 
 clean:
-	rm -f main run-complex-tests run-statevec-tests dbg
+	rm -f main run-complex-tests run-statevec-tests run-gate-tests dbg
