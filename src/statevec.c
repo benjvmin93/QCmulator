@@ -22,11 +22,11 @@ struct Statevec *init_statevec(unsigned char nqubits)
     return sv;
 }
 
-struct Statevec *free_statevec(struct Statevec *sv)
+void free_statevec(struct Statevec *sv)
 {
     unsigned char nqubits = sv->nqubits;
-
-    for (size_t i = 0; i < (1 << nqubits); ++i)
+    size_t size = 1 << nqubits;
+    for (size_t i = 0; i < size; ++i)
     {
         free_complex(sv->data[i]);
     }

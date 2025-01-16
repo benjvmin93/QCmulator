@@ -10,6 +10,6 @@ struct Statevec
 };
 
 struct Statevec *init_statevec(unsigned char nqubits);
-struct Statevec *free_statevec(struct Statevec *sv);
+void free_statevec(struct Statevec *sv);
 
 #endif

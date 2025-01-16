@@ -1,6 +1,6 @@
-CC = gcc
+CC = gcc -std=c99
 
-CFLAGS = -std=c99 -Wextra -Wall
+CFLAGS = -Wextra -Wall
 FILES = main.c
 COMPLEX_TEST = src/utils/alloc.c src/utils/complex.c tests/test_complex.c
 STATEVEC_TEST = src/utils/alloc.c src/utils/complex.c src/statevec.c tests/test_statevec.c
