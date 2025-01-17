@@ -7,28 +7,9 @@
 
 double COMPLEX_EQUAL_THRESHOLD = 1e-10;
 
-// Test the `get_nqubits_from_gate_id` function
-void test_get_nqubits_from_gate_id() {
-    struct Gate gate;
-    
-    get_nqubits_from_gate_id(&gate, I);
-    CU_ASSERT_EQUAL(gate.nqubits, 1);
-
-    get_nqubits_from_gate_id(&gate, CX);
-    CU_ASSERT_EQUAL(gate.nqubits, 2);
-
-    get_nqubits_from_gate_id(&gate, H);
-    CU_ASSERT_EQUAL(gate.nqubits, 1);
-
-    get_nqubits_from_gate_id(&gate, CZ);
-    CU_ASSERT_EQUAL(gate.nqubits, 2);
-}
-
 // Test the `get_data_from_gate_id` function
 void test_get_data_from_gate_id() {
-    struct Gate *gate = xmalloc(sizeof(struct Gate));
-    gate = get_nqubits_from_gate_id(gate, X);
-    gate = get_data_from_gate_id(gate, X, NULL);
+    struct Gate *gate = init_gate(X, NULL);
 
     struct Complex *zero = init_complex(0., 0.);
     struct Complex *one = init_complex(1., 0.);
@@ -45,7 +26,7 @@ void test_get_data_from_gate_id() {
 }
 
 // Test the `init_gate` function
-void test_init_gate() {
+void test_init_gate_H() {
     struct Gate *gate = init_gate(H, NULL);
     CU_ASSERT_EQUAL(gate->nqubits, 1);
     struct Complex *FRAC_SQRT_2 = init_complex(1./sqrt(2.), 0.);
@@ -67,9 +48,8 @@ int main() {
     CU_initialize_registry();
     CU_pSuite suite = CU_add_suite("Gate Tests", NULL, NULL);
 
-    CU_add_test(suite, "Test get_nqubits_from_gate_id", test_get_nqubits_from_gate_id);
     CU_add_test(suite, "Test get_data_from_gate_id", test_get_data_from_gate_id);
-    CU_add_test(suite, "Test init_gate", test_init_gate);
+    CU_add_test(suite, "Test init_gate", test_init_gate_H);
     CU_add_test(suite, "Test free_gate", test_free_gate);
 
     CU_basic_set_mode(CU_BRM_VERBOSE);

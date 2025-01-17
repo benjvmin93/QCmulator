@@ -4,6 +4,7 @@
 
 #include <err.h>
 #include <math.h>
+#include <stdio.h>
 
 struct Complex **I_gate(struct Complex **data)
 {
@@ -143,10 +144,10 @@ struct Complex **CZ_gate(struct Complex **data)
     return data;
 }
 
-struct Gate *get_nqubits_from_gate_id(struct Gate* gate, enum GATE id)
+struct Gate *get_nqubits_from_gate_id(struct Gate* gate)
 {
     unsigned char nqubits = 0;
-    switch (id)
+    switch (gate->id)
     {
     case I:
     case X:
@@ -171,12 +172,12 @@ struct Gate *get_nqubits_from_gate_id(struct Gate* gate, enum GATE id)
     
 }
 
-struct Gate *get_data_from_gate_id(struct Gate *gate, enum GATE id, double *theta)
+struct Gate *get_data_from_gate_id(struct Gate *gate, double *theta)
 {
     size_t dim = 1 << gate->nqubits;
     struct Complex **data = xmalloc(dim * dim * sizeof(struct Complex*));
 
-    switch (id)
+    switch (gate->id)
     {
     case I:
         data = I_gate(data);
@@ -218,8 +219,9 @@ struct Gate *get_data_from_gate_id(struct Gate *gate, enum GATE id, double *thet
 struct Gate *init_gate(enum GATE id, double *alpha)
 {
     struct Gate *gate = xmalloc(sizeof(struct Gate));
-    gate = get_nqubits_from_gate_id(gate, id);
-    gate = get_data_from_gate_id(gate, id, alpha);
+    gate->id = id;
+    gate = get_nqubits_from_gate_id(gate);
+    gate = get_data_from_gate_id(gate, alpha);
     return gate;
 }
 
@@ -233,4 +235,71 @@ void free_gate(struct Gate *gate)
     }
     free(gate->data);
     free(gate);
+}
+
+char *gate_id_to_str(enum GATE id)
+{
+    char *str = "";
+    switch (id)
+    {
+    case I:
+        str = "I";
+        break;
+    case X:
+        str = "X";
+        break;
+    case Y:
+        str = "Y";
+        break;
+    case Z:
+        str = "Z";
+        break;
+    case H:
+        str = "H";
+        break;
+    case RX:
+        str = "RX";
+        break;
+    case RY:
+        str = "RY";
+        break;
+    case RZ:
+        str = "RZ";
+        break;
+    case CX:
+        str = "CX";
+        break;
+    case CZ:
+        str = "CZ";
+        break;
+    default:
+        break;
+    }
+
+    return str;
+}
+
+void print_gate(struct Gate *gate)
+{
+    printf("%s gate:\n", gate_id_to_str(gate->id));
+    size_t dim = 1 << gate->nqubits;
+    for (size_t idx = 0; idx < dim * dim; ++idx)
+    {
+        size_t j = idx % dim;
+
+        if (j == 0)
+        {
+            printf("\t[ ");
+        }
+        print_complex(gate->data[idx]);
+
+        if (j < dim - 1)
+        {
+            printf(", ");
+        }
+        else
+        {
+            printf(" ]\n");
+        }
+    }
 }
