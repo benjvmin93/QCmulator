@@ -29,3 +29,10 @@ int *int_alloc(int a)
     *x = a;
     return x;
 }
+
+unsigned char *uchar_alloc(unsigned char a)
+{
+    unsigned char *x = xmalloc(sizeof(unsigned char));
+    *x = a;
+    return x;
+}
