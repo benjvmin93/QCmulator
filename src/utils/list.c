@@ -30,6 +30,17 @@ struct List *init_list(size_t data_size, size_t initial_size)
     return head;
 }
 
+struct List *init_list_from_array(void *array[], size_t initial_size, size_t data_size)
+{
+    struct List *list = init_list(data_size, initial_size);
+    for (size_t i = 0; i < initial_size; ++i)
+    {
+        list_set(list, i, array[i]);
+    }
+
+    return list;
+}
+
 void free_list(struct List *head)
 {
     struct List *ptr = head;

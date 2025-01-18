@@ -102,6 +102,18 @@ void test_list_size(void) {
     free_list(list);
 }
 
+// Test list size calculation
+void test_list_from_array(void) {
+    void *array[] = { int_alloc(0), int_alloc(1), int_alloc(2), int_alloc(3) };
+    struct List *list = init_list_from_array(array, 4, sizeof(int));
+    CU_ASSERT_EQUAL(list_size(list), 4);
+    for (int i = 0; i < 4; ++i) {
+        CU_ASSERT_EQUAL(*(int*)list_get(list, i)->data, i);
+    }
+
+    free_list(list);
+}
+
 int main() {
     CU_initialize_registry();
 
@@ -112,6 +124,7 @@ int main() {
     CU_ADD_TEST(suite, test_list_get);
     CU_ADD_TEST(suite, test_free_list);
     CU_ADD_TEST(suite, test_list_size);
+    CU_ADD_TEST(suite, test_list_from_array);
 
     CU_basic_set_mode(CU_BRM_VERBOSE);
     CU_basic_run_tests();
