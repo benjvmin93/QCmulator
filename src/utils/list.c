@@ -1,6 +1,8 @@
 #include "../headers/list.h"
 #include "../headers/alloc.h"
 
+#include <stdio.h>
+
 struct List *init_list(size_t data_size, size_t initial_size)
 {
     if (initial_size == 0)
@@ -117,4 +119,44 @@ struct List *list_get(struct List *head, size_t index)
     }
 
     return ptr;
+}
+
+void print_data(enum BUILTIN_TYPES data_type, void *data)
+{
+    if (!data)
+    {
+        printf("%p", data);
+        return;
+    }
+
+    switch (data_type)
+    {
+        case CHAR:
+            printf("%c", *(char *) data);
+            break;
+        case UCHAR:
+            printf("%c", *(unsigned char *) data);
+            break;
+        case INT:
+            printf("%d", *(int *) data);
+            break;
+        case SIZE_T:
+            printf("%lu", *(size_t *) data);
+            break;
+        default:
+            break;
+    }
+}
+
+void list_print(struct List *list, enum BUILTIN_TYPES data_type)
+{
+    printf("\n");
+    struct List *ptr = list;
+    while (ptr)
+    {
+        print_data(data_type, ptr->data);
+        printf(" -> ");
+        ptr = ptr->next;
+    }
+    printf("\n");
 }
