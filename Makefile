@@ -5,6 +5,7 @@ FILES = main.c src/utils/*.c src/*.c
 COMPLEX_TEST = src/utils/alloc.c src/utils/complex.c tests/test_complex.c
 STATEVEC_TEST = src/utils/alloc.c src/utils/complex.c src/statevec.c src/gate.c tests/test_statevec.c
 GATE_TEST = src/utils/alloc.c src/utils/complex.c src/gate.c tests/test_gate.c
+LIST_TEST = src/utils/alloc.c src/utils/list.c tests/test_list.c
 LIBTEST = -lcunit
 LIBS = -lm
 
@@ -20,8 +21,11 @@ test-statevec:
 test-gate:
 	${CC} -fsanitize=address -o run-gate-tests -g ${GATE_TEST} ${LIBTEST} ${LIBS}
 
+test-list:
+	${CC} -fsanitize=address -o run-list-tests -g ${LIST_TEST} ${LIBTEST} ${LIBS}
+
 debug:
 	${CC} ${CFLAGS} -fsanitize=address -o dbg -g ${FILES} ${LIBS}
 
 clean:
-	rm -f main run-complex-tests run-statevec-tests run-gate-tests dbg
+	rm -f main run-complex-tests run-statevec-tests run-gate-tests run-list-tests dbg

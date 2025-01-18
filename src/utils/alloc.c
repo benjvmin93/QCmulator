@@ -22,3 +22,10 @@ void *xcalloc(size_t nmemb, size_t size)
     }
     return ptr;
 }
+
+int *int_alloc(int a)
+{
+    int *x = xmalloc(sizeof(int));
+    *x = a;
+    return x;
+}
