@@ -74,8 +74,8 @@ struct Complex **RY_gate(struct Complex **data, double *theta)
     }
     const double frac_theta_2 = *theta / 2.;
     data[0 * 2 + 0] = init_complex(cos(frac_theta_2), 0.);
-    data[0 * 2 + 1] = init_complex(0., -sin(frac_theta_2));
-    data[1 * 2 + 0] = init_complex(0., sin(frac_theta_2));
+    data[0 * 2 + 1] = init_complex(-sin(frac_theta_2), 0.);
+    data[1 * 2 + 0] = init_complex(sin(frac_theta_2), 0.);
     data[1 * 2 + 1] = init_complex(cos(frac_theta_2), 0.);
     return data;
 }
