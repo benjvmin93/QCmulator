@@ -12,11 +12,7 @@ struct Projector *init_projector(enum PROJECTOR id)
 
 void free_projector(struct Projector *proj)
 {
-    size_t size = 1 << proj->nqubits;
-    for (size_t i = 0; i < size; ++i)
-    {
-        free_complex(proj->data[i]);
-    }
+    free(proj->data);
     free(proj);
 }
 
@@ -33,7 +29,7 @@ int get_nqubits_from_proj_id(enum PROJECTOR proj)
     }
 }
 
-double complex*proj_ZERO(void)
+double complex *proj_ZERO(void)
 {
     size_t size = 1 << 1;
     double complex *data = xmalloc(size * size * sizeof(double complex));
@@ -44,7 +40,7 @@ double complex*proj_ZERO(void)
     return data;
 }
 
-double complex*proj_ONE(void)
+double complex *proj_ONE(void)
 {
     size_t size = 1 << 1;
     double complex *data = xmalloc(size * size * sizeof(double complex));
@@ -56,7 +52,7 @@ double complex*proj_ONE(void)
 }
 
 
-double complex*get_data_from_proj_id(enum PROJECTOR proj)
+double complex *get_data_from_proj_id(enum PROJECTOR proj)
 {
     size_t size = 1 << get_nqubits_from_proj_id(proj);
     double complex *data = NULL;
