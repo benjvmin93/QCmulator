@@ -36,3 +36,10 @@ unsigned char *uchar_alloc(unsigned char a)
     *x = a;
     return x;
 }
+
+bool *bool_alloc(bool a)
+{
+    bool *x = xmalloc(sizeof(bool));
+    *x = a;
+    return x;
+}
