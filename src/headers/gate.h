@@ -13,6 +13,7 @@ enum GATE
     RZ,
     CX,
     CZ,
+    CCX,
 };
 
 struct Gate

@@ -144,6 +144,83 @@ struct Complex **CZ_gate(struct Complex **data)
     return data;
 }
 
+struct Complex **CCX_gate(struct Complex **data)
+{
+    data[0 * 8 + 0] = init_complex(1., 0.);
+    data[0 * 8 + 1] = init_complex(0., 0.);
+    data[0 * 8 + 2] = init_complex(0., 0.);
+    data[0 * 8 + 3] = init_complex(0., 0.);
+    data[0 * 8 + 4] = init_complex(0., 0.);
+    data[0 * 8 + 5] = init_complex(0., 0.);
+    data[0 * 8 + 6] = init_complex(0., 0.);
+    data[0 * 8 + 7] = init_complex(0., 0.);
+    
+    data[1 * 8 + 0] = init_complex(0., 0.);
+    data[1 * 8 + 1] = init_complex(1., 0.);
+    data[1 * 8 + 2] = init_complex(0., 0.);
+    data[1 * 8 + 3] = init_complex(0., 0.);
+    data[1 * 8 + 4] = init_complex(0., 0.);
+    data[1 * 8 + 5] = init_complex(0., 0.);
+    data[1 * 8 + 6] = init_complex(0., 0.);
+    data[1 * 8 + 7] = init_complex(0., 0.);
+
+    data[2 * 8 + 0] = init_complex(0., 0.);
+    data[2 * 8 + 1] = init_complex(0., 0.);
+    data[2 * 8 + 2] = init_complex(1., 0.);
+    data[2 * 8 + 3] = init_complex(0., 0.);
+    data[2 * 8 + 4] = init_complex(0., 0.);
+    data[2 * 8 + 5] = init_complex(0., 0.);
+    data[2 * 8 + 6] = init_complex(0., 0.);
+    data[2 * 8 + 7] = init_complex(0., 0.);
+
+    data[3 * 8 + 0] = init_complex(0., 0.);
+    data[3 * 8 + 1] = init_complex(0., 0.);
+    data[3 * 8 + 2] = init_complex(0., 0.);
+    data[3 * 8 + 3] = init_complex(1., 0.);
+    data[3 * 8 + 4] = init_complex(0., 0.);
+    data[3 * 8 + 5] = init_complex(0., 0.);
+    data[3 * 8 + 6] = init_complex(0., 0.);
+    data[3 * 8 + 7] = init_complex(0., 0.);
+    
+    data[4 * 8 + 0] = init_complex(0., 0.);
+    data[4 * 8 + 1] = init_complex(0., 0.);
+    data[4 * 8 + 2] = init_complex(0., 0.);
+    data[4 * 8 + 3] = init_complex(0., 0.);
+    data[4 * 8 + 4] = init_complex(1., 0.);
+    data[4 * 8 + 5] = init_complex(0., 0.);
+    data[4 * 8 + 6] = init_complex(0., 0.);
+    data[4 * 8 + 7] = init_complex(0., 0.);
+
+    data[5 * 8 + 0] = init_complex(0., 0.);
+    data[5 * 8 + 1] = init_complex(0., 0.);
+    data[5 * 8 + 2] = init_complex(0., 0.);
+    data[5 * 8 + 3] = init_complex(0., 0.);
+    data[5 * 8 + 4] = init_complex(1., 0.);
+    data[5 * 8 + 5] = init_complex(0., 0.);
+    data[5 * 8 + 6] = init_complex(0., 0.);
+    data[5 * 8 + 7] = init_complex(0., 0.);
+
+    data[6 * 8 + 0] = init_complex(0., 0.);
+    data[6 * 8 + 1] = init_complex(0., 0.);
+    data[6 * 8 + 2] = init_complex(0., 0.);
+    data[6 * 8 + 3] = init_complex(0., 0.);
+    data[6 * 8 + 4] = init_complex(0., 0.);
+    data[6 * 8 + 5] = init_complex(0., 0.);
+    data[6 * 8 + 6] = init_complex(0., 0.);
+    data[6 * 8 + 7] = init_complex(1., 0.);
+
+    data[7 * 8 + 0] = init_complex(0., 0.);
+    data[7 * 8 + 1] = init_complex(0., 0.);
+    data[7 * 8 + 2] = init_complex(0., 0.);
+    data[7 * 8 + 3] = init_complex(0., 0.);
+    data[7 * 8 + 4] = init_complex(0., 0.);
+    data[7 * 8 + 5] = init_complex(0., 0.);
+    data[7 * 8 + 6] = init_complex(1., 0.);
+    data[7 * 8 + 7] = init_complex(0., 0.);
+
+    return data;
+}
+
 struct Gate *get_nqubits_from_gate_id(struct Gate* gate)
 {
     unsigned char nqubits = 0;
@@ -163,6 +240,8 @@ struct Gate *get_nqubits_from_gate_id(struct Gate* gate)
     case CZ:
         nqubits = 2;
         break;
+    case CCX:
+        nqubits = 3;
     default:
         break;
     }
@@ -208,6 +287,9 @@ struct Gate *get_data_from_gate_id(struct Gate *gate, double *theta)
         break;
     case CZ:
         data = CZ_gate(data);
+        break;
+    case CCX:
+        data = CCX_gate(data);
         break;
     default:
         return NULL;
@@ -272,6 +354,8 @@ char *gate_id_to_str(enum GATE id)
     case CZ:
         str = "CZ";
         break;
+    case CCX:
+        str = "CCX";
     default:
         break;
     }
