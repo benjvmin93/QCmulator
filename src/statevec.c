@@ -19,9 +19,10 @@ struct Statevec *init_statevec(unsigned char nqubits)
 
     struct Statevec *sv = xmalloc(sizeof(struct Statevec));
     sv->nqubits = nqubits;
+    sv->measurements = NULL;
     size_t size = 1 << nqubits;
-    sv->data = xmalloc(size * sizeof(struct Complex*));
     
+    sv->data = xmalloc(size * sizeof(struct Complex*));
     sv->data[0] = init_complex(1., 0.);
     for (size_t i = 1; i < size; ++i)
     {
@@ -39,6 +40,12 @@ void free_statevec(struct Statevec *sv)
     {
         free_complex(sv->data[i]);
     }
+
+    if (sv->measurements)
+    {
+        free_list(sv->measurements);
+    }
+
     free(sv->data);
     free(sv);
 }
@@ -73,6 +80,7 @@ struct Statevec *evolve_single(struct Statevec *sv, struct Gate *gate, unsigned 
     struct Statevec *result_sv = xmalloc(sizeof(struct Statevec));
     result_sv->nqubits = sv->nqubits;
     result_sv->data = new_data;
+    result_sv->measurements = sv->measurements;
 
     return result_sv;
 }
@@ -151,6 +159,8 @@ struct Statevec *evolve(struct Statevec *sv, struct Gate *gate, struct List *tar
     struct Statevec *result_sv = xmalloc(sizeof(struct Statevec));
     result_sv->nqubits = sv->nqubits;
     result_sv->data = new_data;
+    result_sv->measurements = sv->measurements;
 
     return result_sv;
 }
+

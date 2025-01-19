@@ -5,9 +5,16 @@
 #include "gate.h"
 #include "list.h"
 
+enum PROJECTOR
+{
+    ZERO=0,
+    ONE,
+};
+
 struct Statevec
 {
     struct Complex **data;
+    struct List *measurements;
     unsigned char nqubits;
 };
 
