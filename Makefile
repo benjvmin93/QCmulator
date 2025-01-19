@@ -1,31 +1,50 @@
 CC = gcc -std=c99
-
-CFLAGS = -Wextra -Wall
-FILES = main.c src/utils/*.c src/*.c
-COMPLEX_TEST = src/utils/alloc.c src/utils/complex.c tests/test_complex.c
-STATEVEC_TEST = src/utils/alloc.c src/utils/list.c src/utils/complex.c src/statevec.c src/gate.c tests/test_statevec.c
-GATE_TEST = src/utils/alloc.c src/utils/complex.c src/gate.c tests/test_gate.c
-LIST_TEST = src/utils/alloc.c src/utils/list.c tests/test_list.c
-LIBTEST = -lcunit
+AR = ar
+CFLAGS = -Wextra -Wall -pedantic
 LIBS = -lm
+LIBTEST = -lcunit
 
-all:
-	${CC} ${CFLAGS} -pedantic -o main ${FILES} ${LIBS}
+# Source files
+FILES = main.c src/utils/*.c src/*.c
+UTIL_FILES = src/utils/alloc.c src/utils/list.c src/utils/complex.c
 
-test-complex:
-	${CC} -fsanitize=address -o run-complex-tests -g ${COMPLEX_TEST} ${LIBTEST} ${LIBS}
+# Test files
+COMPLEX_TEST = ${UTIL_FILES} tests/test_complex.c
+STATEVEC_TEST = ${UTIL_FILES} src/statevec.c src/gate.c tests/test_statevec.c
+GATE_TEST = ${UTIL_FILES} src/gate.c tests/test_gate.c
+LIST_TEST = ${UTIL_FILES} tests/test_list.c
 
-test-statevec:
-	${CC} -fsanitize=address -o run-statevec-tests -g ${STATEVEC_TEST} ${LIBTEST} ${LIBS}
+# Build targets
+LIB_NAME = libquantum.a
 
-test-gate:
-	${CC} -fsanitize=address -o run-gate-tests -g ${GATE_TEST} ${LIBTEST} ${LIBS}
+all: ${LIB_NAME} main
 
-test-list:
-	${CC} -fsanitize=address -o run-list-tests -g ${LIST_TEST} ${LIBTEST} ${LIBS}
+# Build the library
+${LIB_NAME}: ${UTIL_FILES}
+	${CC} ${CFLAGS} -c ${UTIL_FILES}
+	${AR} rcs ${LIB_NAME} alloc.o list.o complex.o
 
-debug:
-	${CC} ${CFLAGS} -fsanitize=address -o dbg -g ${FILES} ${LIBS}
+# Build the main application using the library
+main: ${LIB_NAME} main.c src/*.c
+	${CC} ${CFLAGS} -o main main.c src/*.c ${LIB_NAME} ${LIBS}
 
+# Tests
+test-complex: ${LIB_NAME}
+	${CC} -fsanitize=address -o run-test-complex -g tests/test_complex.c ${LIB_NAME} ${LIBTEST} ${LIBS}
+
+test-statevec: ${LIB_NAME}
+	${CC} -fsanitize=address -o run-test-statevec -g ${STATEVEC_TEST} ${LIB_NAME} ${LIBTEST} ${LIBS}
+
+test-gate: ${LIB_NAME}
+	${CC} -fsanitize=address -o run-test-gate -g ${GATE_TEST} ${LIB_NAME} ${LIBTEST} ${LIBS}
+
+test-list: ${LIB_NAME}
+	${CC} -fsanitize=address -o run-test-list -g ${LIST_TEST} ${LIB_NAME} ${LIBTEST} ${LIBS}
+
+# Debug build
+debug: ${LIB_NAME}
+	${CC} ${CFLAGS} -fsanitize=address -o dbg -g main.c src/*.c ${LIB_NAME} ${LIBS}
+
+# Clean up
 clean:
-	rm -f main run-complex-tests run-statevec-tests run-gate-tests run-list-tests dbg
+	rm -f main run-test-complex run-test-statevec run-test-gate run-test-list dbg *.o ${LIB_NAME}
