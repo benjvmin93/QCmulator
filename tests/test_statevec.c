@@ -316,6 +316,51 @@ void test_evolve_incorrect_targets(void)
     free_gate(cnot_gate);
 }
 
+void test_norm(void)
+{
+    struct Statevec *sv = xmalloc(sizeof(struct Statevec));
+    sv->nqubits = 1;
+    sv->data = xmalloc(2 * sizeof(double complex));
+    sv->data[0] = 1. / sqrt(2);
+    sv->data[1] = 1. / sqrt(2);
+
+    double norm = statevec_norm(sv);
+    CU_ASSERT_DOUBLE_EQUAL(norm, 1., 0.001);
+    free(sv->data);
+
+    sv->nqubits = 2;
+    sv->data = xmalloc(4 * sizeof(double complex));
+    sv->data[0] = 1;
+    sv->data[1] = 1;
+    sv->data[2] = 1;
+    sv->data[3] = 1;
+
+    norm = statevec_norm(sv);
+    CU_ASSERT_DOUBLE_EQUAL(norm, 2., 0.001);
+    free(sv->data);
+
+    sv->nqubits = 1;
+    sv->data = xmalloc(2 * sizeof(double complex));
+    sv->data[0] = 0;
+    sv->data[1] = 0;
+
+    norm = statevec_norm(sv);
+    CU_ASSERT_DOUBLE_EQUAL(norm, 0., 0.001);
+    free(sv->data);
+
+    free(sv);
+}
+
+void test_normalize(void)
+{
+    double complex data1[] = {1.0 + I, 2.0, 0.0, -5.0*I};
+    struct Statevec sv1 = { .data = data1, .nqubits = 2 };
+
+    struct Statevec *normalized = normalize(&sv1);
+
+    CU_ASSERT_DOUBLE_EQUAL(statevec_norm(normalized), 1., 0.001);
+}
+
 int main()
 {
     CU_initialize_registry();
@@ -338,7 +383,8 @@ int main()
     CU_add_test(suite, "Test Evolve with Hadamard Gate", test_evolve_Hadamard_gate);
     CU_add_test(suite, "Test Evolve with Invalid Inputs", test_evolve_invalid_inputs);
     CU_add_test(suite, "Test Evolve with Incorrect Targets", test_evolve_incorrect_targets);
-
+    CU_add_test(suite, "Test Norm", test_norm);
+    CU_add_test(suite, "Test Normalize", test_normalize);
     CU_basic_set_mode(CU_BRM_VERBOSE);
     CU_basic_run_tests();
 

@@ -9,7 +9,7 @@ FILES = main.c src/utils/*.c src/*.c
 UTIL_FILES = src/utils/alloc.c src/utils/list.c
 
 # Test files
-STATEVEC_TEST = ${UTIL_FILES} src/statevec.c src/gate.c tests/test_statevec.c
+STATEVEC_TEST = ${UTIL_FILES} src/statevec.c src/gate.c src/projector.c tests/test_statevec.c
 GATE_TEST = ${UTIL_FILES} src/gate.c tests/test_gate.c
 LIST_TEST = ${UTIL_FILES} tests/test_list.c
 
@@ -28,7 +28,6 @@ main: ${LIB_NAME} main.c src/*.c
 	${CC} ${CFLAGS} -o main main.c src/*.c ${LIB_NAME} ${LIBS}
 
 # Tests
-
 test-statevec: ${LIB_NAME}
 	${CC} -fsanitize=address -o run-test-statevec -g ${STATEVEC_TEST} ${LIB_NAME} ${LIBTEST} ${LIBS}
 

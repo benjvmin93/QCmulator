@@ -16,7 +16,10 @@ struct Statevec
 
 struct Statevec *init_statevec(unsigned char nqubits);
 void free_statevec(struct Statevec *sv);
+double statevec_norm(struct Statevec *sv);
+struct Statevec *normalize(struct Statevec *sv);
 struct Statevec *evolve_single(struct Statevec *sv, double complex *gate, unsigned char target);
 struct Statevec *evolve(struct Statevec *sv, struct Gate *gate, struct List *targets);
+void print_statevec(struct Statevec *sv);
 
 #endif

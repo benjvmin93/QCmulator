@@ -8,8 +8,27 @@
 #include <stdlib.h>
 #include <time.h>
 
+void print_statevec(struct Statevec *sv)
+{
+    printf("\n[");
+    size_t dim = 1 << sv->nqubits;
+    for (size_t idx = 0; idx < dim; ++idx)
+    {
+        if (idx < dim - 1)
+        {
+            printf("\t%.10f%+.10fi\n", creal(sv->data[idx]), cimag(sv->data[idx]));
+        }
+        else
+        {
+            printf("\t%.10f%+.10fi]\n", creal(sv->data[idx]), cimag(sv->data[idx]));
+        }
+        
+    }
+}
+
 void printBinary(int num) {
-    for (int i = sizeof(int) * 8 - 1; i >= 0; i--) {
+    for (int i = sizeof(int) * 8 - 1; i >= 0; i--)
+    {
         printf("%d", (num >> i) & 1);
     }
     printf("\n");
@@ -187,7 +206,7 @@ double statevec_norm(struct Statevec *sv)
     double norm = 0.0;
 
     for (size_t i = 0; i < size; ++i) {
-        norm += cabs(data[i]);
+        norm += creal(data[i]) * creal(data[i]) + cimag(data[i]) * cimag(data[i]);
     }
 
     return sqrt(norm);
