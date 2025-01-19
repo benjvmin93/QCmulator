@@ -1,8 +1,10 @@
 #include "headers/statevec.h"
 #include "headers/alloc.h"
 #include "headers/gate.h"
+#include "headers/projector.h"
 
-#include <stdio.h> 
+#include <stdio.h>
+
 void printBinary(int num) {
     for (int i = sizeof(int) * 8 - 1; i >= 0; i--) {
         printf("%d", (num >> i) & 1);
@@ -22,11 +24,11 @@ struct Statevec *init_statevec(unsigned char nqubits)
     sv->measurements = NULL;
     size_t size = 1 << nqubits;
     
-    sv->data = xmalloc(size * sizeof(struct Complex*));
-    sv->data[0] = init_complex(1., 0.);
+    sv->data = xmalloc(size * sizeof(double complex));
+    sv->data[0] = 1;
     for (size_t i = 1; i < size; ++i)
     {
-        sv->data[i] = init_complex(0., 0.);
+        sv->data[i] = 0;
     }
 
     return sv;
@@ -34,13 +36,6 @@ struct Statevec *init_statevec(unsigned char nqubits)
 
 void free_statevec(struct Statevec *sv)
 {
-    unsigned char nqubits = sv->nqubits;
-    size_t size = 1 << nqubits;
-    for (size_t i = 0; i < size; ++i)
-    {
-        free_complex(sv->data[i]);
-    }
-
     if (sv->measurements)
     {
         free_list(sv->measurements);
@@ -61,7 +56,7 @@ struct Statevec *evolve_single(struct Statevec *sv, struct Gate *gate, unsigned 
     int size = 1 << nqubits;
     int mask = 1 << (nqubits - target - 1);
 
-    struct Complex **new_data = xmalloc(size * sizeof(struct Complex*));
+    double complex *new_data = xmalloc(size * sizeof(double complex));
     for (int i = 0; i < (1 << nqubits); ++i)
     {
         int index_op_high = (i & mask) != 0 ? 2 : 0;
@@ -69,12 +64,7 @@ struct Statevec *evolve_single(struct Statevec *sv, struct Gate *gate, unsigned 
         int index_cell0 = i & ~mask;
         int index_cell1 = i | mask;
 
-        struct Complex *contrib_1 = complex_mul(gate->data[index_op_high], sv->data[index_cell0]);
-        struct Complex *contrib_2 = complex_mul(gate->data[index_op_high | 1], sv->data[index_cell1]);
-
-        new_data[i] = complex_add(contrib_1, contrib_2);
-        free_complex(contrib_1);
-        free_complex(contrib_2);
+        new_data[i] = gate->data[index_op_high] * sv->data[index_cell0] + gate->data[index_op_high | 1] * sv->data[index_cell1];
     }
 
     struct Statevec *result_sv = xmalloc(sizeof(struct Statevec));
@@ -114,11 +104,11 @@ struct Statevec *evolve(struct Statevec *sv, struct Gate *gate, struct List *tar
     }
 
     int size = 1 << nqubits_sv;
-    struct Complex **new_data = xmalloc(size * sizeof(struct Complex*));
+    double complex *new_data = xmalloc(size * sizeof(double complex));
     for (int i = 0; i < size; ++i)
     {
         int i_base = i & ~mask;
-        struct Complex *sum = init_complex(0., 0.);
+        double complex sum = 0;
         for (int j = 0; j < (1 << nqubits_gate); ++j)
         {
             int maskJ = 0;
@@ -144,13 +134,7 @@ struct Statevec *evolve(struct Statevec *sv, struct Gate *gate, struct List *tar
             int colIndex = j;
 
             int data_index = rowIndex * (1 << nqubits_gate) + colIndex; // Debug
-            struct Complex *contrib = complex_mul(gate->data[data_index], sv->data[index]);
-            struct Complex *new_sum = complex_add(sum, contrib);
-
-            free_complex(sum);
-            free_complex(contrib);
-
-            sum = new_sum;
+            sum += gate->data[data_index] * sv->data[index];
         }
 
         new_data[i] = sum;
@@ -164,3 +148,41 @@ struct Statevec *evolve(struct Statevec *sv, struct Gate *gate, struct List *tar
     return result_sv;
 }
 
+struct List *init_measurement_list(struct Statevec *sv)
+{
+    struct List *m = init_list(sizeof(int), 1 << sv->nqubits);
+    struct List *tmp = m;
+    while (tmp)
+    {
+        tmp->data = int_alloc(0);
+        tmp = tmp->next;
+    }
+}
+
+float statevec_norm(struct Statevec *sv)
+{
+
+}
+
+struct Statevec *normalize(struct Statevec *sv)
+{
+
+}
+
+float expectation_proj(struct Statevec *sv, enum PROJECTOR proj)
+{
+
+}
+
+struct List *measure(struct Statevec *sv, enum PROJECTOR proj, int target)
+{
+    struct List *measurements = sv->measurements;
+    if (!measurements)
+    {
+        measurements = init_measurement_list(sv);
+    }
+
+    
+
+    
+}

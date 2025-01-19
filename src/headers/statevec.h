@@ -1,19 +1,14 @@
 #ifndef STATEVEC_H
 #define STATEVEC_H
 
-#include "complex.h"
 #include "gate.h"
 #include "list.h"
 
-enum PROJECTOR
-{
-    ZERO=0,
-    ONE,
-};
+#include <complex.h>
 
 struct Statevec
 {
-    struct Complex **data;
+    double complex *data;
     struct List *measurements;
     unsigned char nqubits;
 };

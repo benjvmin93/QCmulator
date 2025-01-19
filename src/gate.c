@@ -1,222 +1,221 @@
 #include "headers/gate.h"
 #include "headers/alloc.h"
-#include "headers/complex.h"
 
 #include <err.h>
 #include <math.h>
 #include <stdio.h>
 
-struct Complex **I_gate(struct Complex **data)
+double complex *ID_gate(double complex *data)
 {
-    data[0 * 2 + 0] = init_complex(1., 0.);
-    data[0 * 2 + 1] = init_complex(0., 0.);
-    data[1 * 2 + 0] = init_complex(0., 0.);
-    data[1 * 2 + 1] = init_complex(1., 0.);
+    data[0 * 2 + 0] = 1;
+    data[0 * 2 + 1] = 0;
+    data[1 * 2 + 0] = 0;
+    data[1 * 2 + 1] = 1;
     return data;
 }
 
-struct Complex **X_gate(struct Complex **data)
+double complex *X_gate(double complex *data)
 {
-    data[0 * 2 + 0] = init_complex(0., 0.);
-    data[0 * 2 + 1] = init_complex(1., 0.);
-    data[1 * 2 + 0] = init_complex(1., 0.);
-    data[1 * 2 + 1] = init_complex(0., 0.);
+    data[0 * 2 + 0] = 0;
+    data[0 * 2 + 1] = 1;
+    data[1 * 2 + 0] = 1;
+    data[1 * 2 + 1] = 0;
     return data;
 }
 
-struct Complex **Y_gate(struct Complex **data)
+double complex *Y_gate(double complex *data)
 {
-    data[0 * 2 + 0] = init_complex(0., 0.);
-    data[0 * 2 + 1] = init_complex(0., -1.);
-    data[1 * 2 + 0] = init_complex(0., 1.);
-    data[1 * 2 + 1] = init_complex(0., 0.);
+    data[0 * 2 + 0] = 0;
+    data[0 * 2 + 1] = -1 * I;
+    data[1 * 2 + 0] = I;
+    data[1 * 2 + 1] = 0;
     return data;
 }
 
-struct Complex **Z_gate(struct Complex **data)
+double complex *Z_gate(double complex *data)
 {
-    data[0 * 2 + 0] = init_complex(1., 0.);
-    data[0 * 2 + 1] = init_complex(0., 0.);
-    data[1 * 2 + 0] = init_complex(0., 0.);
-    data[1 * 2 + 1] = init_complex(-1., 0.);
+    data[0 * 2 + 0] = 1;
+    data[0 * 2 + 1] = 0;
+    data[1 * 2 + 0] = 0;
+    data[1 * 2 + 1] = -1;
     return data;
 }
 
-struct Complex **H_gate(struct Complex **data)
+double complex *H_gate(double complex *data)
 {
     double FRAC_SQRT_2 = 1/sqrt(2.);
-    data[0 * 2 + 0] = init_complex(FRAC_SQRT_2, 0.);
-    data[0 * 2 + 1] = init_complex(FRAC_SQRT_2, 0.);
-    data[1 * 2 + 0] = init_complex(FRAC_SQRT_2, 0.);
-    data[1 * 2 + 1] = init_complex(-FRAC_SQRT_2, 0.);
+    data[0 * 2 + 0] = FRAC_SQRT_2;
+    data[0 * 2 + 1] = FRAC_SQRT_2;
+    data[1 * 2 + 0] = FRAC_SQRT_2;
+    data[1 * 2 + 1] = -FRAC_SQRT_2;
     return data;
 }
 
-struct Complex **RX_gate(struct Complex **data, double *theta)
+double complex *RX_gate(double complex *data, double *theta)
 {
     if (!theta)
     {
         err(MATH_ERREXCEPT, "Angle is not defined for RX gate");
     }
     double frac_theta_2 = *theta / 2.;
-    data[0 * 2 + 0] = init_complex(cos(frac_theta_2), 0.);
-    data[0 * 2 + 1] = init_complex(0., -sin(frac_theta_2));
-    data[1 * 2 + 0] = init_complex(0., -sin(frac_theta_2));
-    data[1 * 2 + 1] = init_complex(cos(frac_theta_2), 0.);
+    data[0 * 2 + 0] = cos(frac_theta_2);
+    data[0 * 2 + 1] = -sin(frac_theta_2) * I;
+    data[1 * 2 + 0] = -sin(frac_theta_2) * I;
+    data[1 * 2 + 1] = cos(frac_theta_2);
     return data;
 }
 
-struct Complex **RY_gate(struct Complex **data, double *theta)
+double complex *RY_gate(double complex *data, double *theta)
 {
     if (!theta)
     {
         err(MATH_ERREXCEPT, "Angle is not defined for RY gate");
     }
     const double frac_theta_2 = *theta / 2.;
-    data[0 * 2 + 0] = init_complex(cos(frac_theta_2), 0.);
-    data[0 * 2 + 1] = init_complex(-sin(frac_theta_2), 0.);
-    data[1 * 2 + 0] = init_complex(sin(frac_theta_2), 0.);
-    data[1 * 2 + 1] = init_complex(cos(frac_theta_2), 0.);
+    data[0 * 2 + 0] = cos(frac_theta_2);
+    data[0 * 2 + 1] = -sin(frac_theta_2);
+    data[1 * 2 + 0] = sin(frac_theta_2);
+    data[1 * 2 + 1] = cos(frac_theta_2);
     return data;
 }
 
-struct Complex **RZ_gate(struct Complex **data, double *theta)
+double complex *RZ_gate(double complex *data, double *theta)
 {
     if (!theta)
     {
         err(MATH_ERREXCEPT, "Angle is not defined for RZ gate");
     }
     const double frac_theta_2 = sqrt(2.);
-    data[0 * 2 + 0] = init_complex(0., exp(-frac_theta_2));
-    data[0 * 2 + 1] = init_complex(0., 0.);
-    data[1 * 2 + 0] = init_complex(0., 0.);
-    data[1 * 2 + 1] = init_complex(0., exp(frac_theta_2));
+    data[0 * 2 + 0] = exp(-frac_theta_2) * I;
+    data[0 * 2 + 1] = 0;
+    data[1 * 2 + 0] = 0;
+    data[1 * 2 + 1] = exp(frac_theta_2) * I;
     return data;
 }
 
-struct Complex **CX_gate(struct Complex **data)
+double complex *CX_gate(double complex *data)
 {
-    data[0 * 4 + 0] = init_complex(1., 0.);
-    data[0 * 4 + 1] = init_complex(0., 0.);
-    data[0 * 4 + 2] = init_complex(0., 0.);
-    data[0 * 4 + 3] = init_complex(0., 0.);
+    data[0 * 4 + 0] = 1;
+    data[0 * 4 + 1] = 0;
+    data[0 * 4 + 2] = 0;
+    data[0 * 4 + 3] = 0;
     
-    data[1 * 4 + 0] = init_complex(0., 0.);
-    data[1 * 4 + 1] = init_complex(1., 0.);
-    data[1 * 4 + 2] = init_complex(0., 0.);
-    data[1 * 4 + 3] = init_complex(0., 0.);
+    data[1 * 4 + 0] = 0;
+    data[1 * 4 + 1] = 1;
+    data[1 * 4 + 2] = 0;
+    data[1 * 4 + 3] = 0;
 
-    data[2 * 4 + 0] = init_complex(0., 0.);
-    data[2 * 4 + 1] = init_complex(0., 0.);
-    data[2 * 4 + 2] = init_complex(0., 0.);
-    data[2 * 4 + 3] = init_complex(1., 0.);
+    data[2 * 4 + 0] = 0;
+    data[2 * 4 + 1] = 0;
+    data[2 * 4 + 2] = 0;
+    data[2 * 4 + 3] = 1;
 
-    data[3 * 4 + 0] = init_complex(0., 0.);
-    data[3 * 4 + 1] = init_complex(0., 0.);
-    data[3 * 4 + 2] = init_complex(1., 0.);
-    data[3 * 4 + 3] = init_complex(0., 0.);
-
-    return data;
-}
-
-struct Complex **CZ_gate(struct Complex **data)
-{
-    data[0 * 4 + 0] = init_complex(1., 0.);
-    data[0 * 4 + 1] = init_complex(0., 0.);
-    data[0 * 4 + 2] = init_complex(0., 0.);
-    data[0 * 4 + 3] = init_complex(0., 0.);
-    
-    data[1 * 4 + 0] = init_complex(0., 0.);
-    data[1 * 4 + 1] = init_complex(1., 0.);
-    data[1 * 4 + 2] = init_complex(0., 0.);
-    data[1 * 4 + 3] = init_complex(0., 0.);
-
-    data[2 * 4 + 0] = init_complex(0., 0.);
-    data[2 * 4 + 1] = init_complex(0., 0.);
-    data[2 * 4 + 2] = init_complex(1., 0.);
-    data[2 * 4 + 3] = init_complex(0., 0.);
-
-    data[3 * 4 + 0] = init_complex(0., 0.);
-    data[3 * 4 + 1] = init_complex(0., 0.);
-    data[3 * 4 + 2] = init_complex(0., 0.);
-    data[3 * 4 + 3] = init_complex(-1., 0.);
+    data[3 * 4 + 0] = 0;
+    data[3 * 4 + 1] = 0;
+    data[3 * 4 + 2] = 1;
+    data[3 * 4 + 3] = 0;
 
     return data;
 }
 
-struct Complex **CCX_gate(struct Complex **data)
+double complex *CZ_gate(double complex *data)
 {
-    data[0 * 8 + 0] = init_complex(1., 0.);
-    data[0 * 8 + 1] = init_complex(0., 0.);
-    data[0 * 8 + 2] = init_complex(0., 0.);
-    data[0 * 8 + 3] = init_complex(0., 0.);
-    data[0 * 8 + 4] = init_complex(0., 0.);
-    data[0 * 8 + 5] = init_complex(0., 0.);
-    data[0 * 8 + 6] = init_complex(0., 0.);
-    data[0 * 8 + 7] = init_complex(0., 0.);
+    data[0 * 4 + 0] = 1;
+    data[0 * 4 + 1] = 0;
+    data[0 * 4 + 2] = 0;
+    data[0 * 4 + 3] = 0;
     
-    data[1 * 8 + 0] = init_complex(0., 0.);
-    data[1 * 8 + 1] = init_complex(1., 0.);
-    data[1 * 8 + 2] = init_complex(0., 0.);
-    data[1 * 8 + 3] = init_complex(0., 0.);
-    data[1 * 8 + 4] = init_complex(0., 0.);
-    data[1 * 8 + 5] = init_complex(0., 0.);
-    data[1 * 8 + 6] = init_complex(0., 0.);
-    data[1 * 8 + 7] = init_complex(0., 0.);
+    data[1 * 4 + 0] = 0;
+    data[1 * 4 + 1] = 1;
+    data[1 * 4 + 2] = 0;
+    data[1 * 4 + 3] = 0;
 
-    data[2 * 8 + 0] = init_complex(0., 0.);
-    data[2 * 8 + 1] = init_complex(0., 0.);
-    data[2 * 8 + 2] = init_complex(1., 0.);
-    data[2 * 8 + 3] = init_complex(0., 0.);
-    data[2 * 8 + 4] = init_complex(0., 0.);
-    data[2 * 8 + 5] = init_complex(0., 0.);
-    data[2 * 8 + 6] = init_complex(0., 0.);
-    data[2 * 8 + 7] = init_complex(0., 0.);
+    data[2 * 4 + 0] = 0;
+    data[2 * 4 + 1] = 0;
+    data[2 * 4 + 2] = 1;
+    data[2 * 4 + 3] = 0;
 
-    data[3 * 8 + 0] = init_complex(0., 0.);
-    data[3 * 8 + 1] = init_complex(0., 0.);
-    data[3 * 8 + 2] = init_complex(0., 0.);
-    data[3 * 8 + 3] = init_complex(1., 0.);
-    data[3 * 8 + 4] = init_complex(0., 0.);
-    data[3 * 8 + 5] = init_complex(0., 0.);
-    data[3 * 8 + 6] = init_complex(0., 0.);
-    data[3 * 8 + 7] = init_complex(0., 0.);
+    data[3 * 4 + 0] = 0;
+    data[3 * 4 + 1] = 0;
+    data[3 * 4 + 2] = 0;
+    data[3 * 4 + 3] = -1;
+
+    return data;
+}
+
+double complex *CCX_gate(double complex *data)
+{
+    data[0 * 8 + 0] = 1;
+    data[0 * 8 + 1] = 0;
+    data[0 * 8 + 2] = 0;
+    data[0 * 8 + 3] = 0;
+    data[0 * 8 + 4] = 0;
+    data[0 * 8 + 5] = 0;
+    data[0 * 8 + 6] = 0;
+    data[0 * 8 + 7] = 0;
     
-    data[4 * 8 + 0] = init_complex(0., 0.);
-    data[4 * 8 + 1] = init_complex(0., 0.);
-    data[4 * 8 + 2] = init_complex(0., 0.);
-    data[4 * 8 + 3] = init_complex(0., 0.);
-    data[4 * 8 + 4] = init_complex(1., 0.);
-    data[4 * 8 + 5] = init_complex(0., 0.);
-    data[4 * 8 + 6] = init_complex(0., 0.);
-    data[4 * 8 + 7] = init_complex(0., 0.);
+    data[1 * 8 + 0] = 0;
+    data[1 * 8 + 1] = 1;
+    data[1 * 8 + 2] = 0;
+    data[1 * 8 + 3] = 0;
+    data[1 * 8 + 4] = 0;
+    data[1 * 8 + 5] = 0;
+    data[1 * 8 + 6] = 0;
+    data[1 * 8 + 7] = 0;
 
-    data[5 * 8 + 0] = init_complex(0., 0.);
-    data[5 * 8 + 1] = init_complex(0., 0.);
-    data[5 * 8 + 2] = init_complex(0., 0.);
-    data[5 * 8 + 3] = init_complex(0., 0.);
-    data[5 * 8 + 4] = init_complex(1., 0.);
-    data[5 * 8 + 5] = init_complex(0., 0.);
-    data[5 * 8 + 6] = init_complex(0., 0.);
-    data[5 * 8 + 7] = init_complex(0., 0.);
+    data[2 * 8 + 0] = 0;
+    data[2 * 8 + 1] = 0;
+    data[2 * 8 + 2] = 1;
+    data[2 * 8 + 3] = 0;
+    data[2 * 8 + 4] = 0;
+    data[2 * 8 + 5] = 0;
+    data[2 * 8 + 6] = 0;
+    data[2 * 8 + 7] = 0;
 
-    data[6 * 8 + 0] = init_complex(0., 0.);
-    data[6 * 8 + 1] = init_complex(0., 0.);
-    data[6 * 8 + 2] = init_complex(0., 0.);
-    data[6 * 8 + 3] = init_complex(0., 0.);
-    data[6 * 8 + 4] = init_complex(0., 0.);
-    data[6 * 8 + 5] = init_complex(0., 0.);
-    data[6 * 8 + 6] = init_complex(0., 0.);
-    data[6 * 8 + 7] = init_complex(1., 0.);
+    data[3 * 8 + 0] = 0;
+    data[3 * 8 + 1] = 0;
+    data[3 * 8 + 2] = 0;
+    data[3 * 8 + 3] = 1;
+    data[3 * 8 + 4] = 0;
+    data[3 * 8 + 5] = 0;
+    data[3 * 8 + 6] = 0;
+    data[3 * 8 + 7] = 0;
+    
+    data[4 * 8 + 0] = 0;
+    data[4 * 8 + 1] = 0;
+    data[4 * 8 + 2] = 0;
+    data[4 * 8 + 3] = 0;
+    data[4 * 8 + 4] = 1;
+    data[4 * 8 + 5] = 0;
+    data[4 * 8 + 6] = 0;
+    data[4 * 8 + 7] = 0;
 
-    data[7 * 8 + 0] = init_complex(0., 0.);
-    data[7 * 8 + 1] = init_complex(0., 0.);
-    data[7 * 8 + 2] = init_complex(0., 0.);
-    data[7 * 8 + 3] = init_complex(0., 0.);
-    data[7 * 8 + 4] = init_complex(0., 0.);
-    data[7 * 8 + 5] = init_complex(0., 0.);
-    data[7 * 8 + 6] = init_complex(1., 0.);
-    data[7 * 8 + 7] = init_complex(0., 0.);
+    data[5 * 8 + 0] = 0;
+    data[5 * 8 + 1] = 0;
+    data[5 * 8 + 2] = 0;
+    data[5 * 8 + 3] = 0;
+    data[5 * 8 + 4] = 1;
+    data[5 * 8 + 5] = 0;
+    data[5 * 8 + 6] = 0;
+    data[5 * 8 + 7] = 0;
+
+    data[6 * 8 + 0] = 0;
+    data[6 * 8 + 1] = 0;
+    data[6 * 8 + 2] = 0;
+    data[6 * 8 + 3] = 0;
+    data[6 * 8 + 4] = 0;
+    data[6 * 8 + 5] = 0;
+    data[6 * 8 + 6] = 0;
+    data[6 * 8 + 7] = 1;
+
+    data[7 * 8 + 0] = 0;
+    data[7 * 8 + 1] = 0;
+    data[7 * 8 + 2] = 0;
+    data[7 * 8 + 3] = 0;
+    data[7 * 8 + 4] = 0;
+    data[7 * 8 + 5] = 0;
+    data[7 * 8 + 6] = 1;
+    data[7 * 8 + 7] = 0;
 
     return data;
 }
@@ -226,7 +225,7 @@ struct Gate *get_nqubits_from_gate_id(struct Gate* gate)
     unsigned char nqubits = 0;
     switch (gate->id)
     {
-    case I:
+    case ID:
     case X:
     case Y:
     case Z:
@@ -254,12 +253,12 @@ struct Gate *get_nqubits_from_gate_id(struct Gate* gate)
 struct Gate *get_data_from_gate_id(struct Gate *gate, double *theta)
 {
     size_t dim = 1 << gate->nqubits;
-    struct Complex **data = xmalloc(dim * dim * sizeof(struct Complex*));
+    double complex *data = xmalloc(dim * dim * sizeof(double complex));
 
     switch (gate->id)
     {
-    case I:
-        data = I_gate(data);
+    case ID:
+        data = ID_gate(data);
         break;
     case X:
         data = X_gate(data);
@@ -309,12 +308,6 @@ struct Gate *init_gate(enum GATE id, double *alpha)
 
 void free_gate(struct Gate *gate)
 {
-    size_t dim = 1 << gate->nqubits;
-    for (size_t i = 0; i < dim * dim; ++i)
-    {
-
-        free_complex(gate->data[i]);
-    }
     free(gate->data);
     free(gate);
 }
@@ -324,7 +317,7 @@ char *gate_id_to_str(enum GATE id)
     char *str = "";
     switch (id)
     {
-    case I:
+    case ID:
         str = "I";
         break;
     case X:
@@ -375,8 +368,8 @@ void print_gate(struct Gate *gate)
         {
             printf("\t[ ");
         }
-        print_complex(gate->data[idx]);
 
+        printf("%.1f%+.1fi", creal(gate->data[idx]), cimag(gate->data[idx]));
         if (j < dim - 1)
         {
             printf(", ");

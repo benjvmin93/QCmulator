@@ -1,9 +1,11 @@
 #ifndef GATE_H
 #define GATE_H
 
+#include <complex.h>
+
 enum GATE
 {
-    I=0,
+    ID=0,
     X,
     Y,
     Z,
@@ -18,7 +20,7 @@ enum GATE
 
 struct Gate
 {
-    struct Complex **data;
+    double complex *data;
     enum GATE id;
     unsigned char nqubits;
 };

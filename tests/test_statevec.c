@@ -1,9 +1,9 @@
-#include <CUnit/CUnit.h>
-#include <CUnit/Basic.h>
 #include "../src/headers/statevec.h"
 #include "../src/headers/gate.h"
 #include "../src/headers/list.h"
-#include "../src/headers/alloc.h"
+
+#include <CUnit/CUnit.h>
+#include <CUnit/Basic.h>
 
 #define PI 3.14159265358979323846
 
@@ -14,20 +14,18 @@ void test_init_statevec_valid(void)
 
     CU_ASSERT_PTR_NOT_NULL(sv);
     CU_ASSERT_EQUAL(sv->nqubits, nqubits);
+    CU_ASSERT_PTR_NOT_NULL(sv->data);
 
     size_t size = 1 << nqubits;
     for (size_t i = 0; i < size; ++i)
     {
-        CU_ASSERT_PTR_NOT_NULL(sv->data[i]);
         if (i == 0)
         {
-            CU_ASSERT_DOUBLE_EQUAL(*sv->data[i]->a, 1.0, 0.001);
-            CU_ASSERT_DOUBLE_EQUAL(*sv->data[i]->b, 0.0, 0.001);
+            CU_ASSERT_DOUBLE_EQUAL(sv->data[i], 1, 0.001);
         }
         else
         {
-            CU_ASSERT_DOUBLE_EQUAL(*sv->data[i]->a, 0.0, 0.001);
-            CU_ASSERT_DOUBLE_EQUAL(*sv->data[i]->b, 0.0, 0.001);
+            CU_ASSERT_DOUBLE_EQUAL(sv->data[i], 0, 0.001);
         }
     }
 
@@ -75,8 +73,8 @@ void test_statevec_data_access(void)
         size_t size = 1 << sv->nqubits;
         for (size_t i = 0; i < size; ++i)
         {
-            struct Complex *data = sv->data[i];
-            double mod = complex_modulus(data);
+            double complex data = sv->data[i];
+            double mod = cabs(data);
         }
         free_statevec(sv);
     }
@@ -92,10 +90,10 @@ void test_evolve_single_X_gate(void)
     struct Statevec *result_sv = evolve_single(sv, x_gate, 0);
 
     // Expected result: |10> state
-    CU_ASSERT_DOUBLE_EQUAL(*result_sv->data[0]->a, 0.0, 0.001);
-    CU_ASSERT_DOUBLE_EQUAL(*result_sv->data[1]->a, 0.0, 0.001);
-    CU_ASSERT_DOUBLE_EQUAL(*result_sv->data[2]->a, 1.0, 0.001);
-    CU_ASSERT_DOUBLE_EQUAL(*result_sv->data[3]->a, 0.0, 0.001);
+    CU_ASSERT_EQUAL(result_sv->data[0], 0);
+    CU_ASSERT_EQUAL(result_sv->data[1], 0);
+    CU_ASSERT_EQUAL(result_sv->data[2], 1);
+    CU_ASSERT_EQUAL(result_sv->data[3], 0);
 
     free_statevec(result_sv);
     free_statevec(sv);
@@ -112,8 +110,8 @@ void test_evolve_single_H_gate(void)
     struct Statevec *result_sv = evolve_single(sv, h_gate, 0);
 
     // Expected result: superposition |0> + |1>
-    CU_ASSERT_DOUBLE_EQUAL(*result_sv->data[0]->a, sqrt(0.5), 0.001);
-    CU_ASSERT_DOUBLE_EQUAL(*result_sv->data[1]->a, sqrt(0.5), 0.001);
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[0]), sqrt(0.5), 0.001);
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[1]), sqrt(0.5), 0.001);
 
     free_statevec(result_sv);
     free_statevec(sv);
@@ -131,8 +129,8 @@ void test_evolve_single_RY_gate(void)
     struct Statevec *result_sv = evolve_single(sv, ry_gate, 0);
 
     // Expected result: |1>
-    CU_ASSERT_DOUBLE_EQUAL(*result_sv->data[0]->a, 0., 0.001);
-    CU_ASSERT_DOUBLE_EQUAL(*result_sv->data[1]->a, 1., 0.001);
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[0]), 0., 0.001);
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[1]), 1., 0.001);
 
     free_statevec(result_sv);
     free_statevec(sv);
@@ -149,14 +147,14 @@ void test_evolve_single_target_qubit(void)
     struct Statevec *result_sv = evolve_single(sv, x_gate, 2);
 
     // Verify the state vector after applying X gate
-    CU_ASSERT_DOUBLE_EQUAL(*result_sv->data[0]->a, 0.0, 0.001); // 000
-    CU_ASSERT_DOUBLE_EQUAL(*result_sv->data[1]->a, 1.0, 0.001); // 001
-    CU_ASSERT_DOUBLE_EQUAL(*result_sv->data[2]->a, 0.0, 0.001); // 010
-    CU_ASSERT_DOUBLE_EQUAL(*result_sv->data[3]->a, 0.0, 0.001); // 011
-    CU_ASSERT_DOUBLE_EQUAL(*result_sv->data[4]->a, 0.0, 0.001); // 100
-    CU_ASSERT_DOUBLE_EQUAL(*result_sv->data[5]->a, 0.0, 0.001); // 101
-    CU_ASSERT_DOUBLE_EQUAL(*result_sv->data[6]->a, 0.0, 0.001); // 110
-    CU_ASSERT_DOUBLE_EQUAL(*result_sv->data[7]->a, 0.0, 0.001); // 111
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[0]), 0.0, 0.001); // 000
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[1]), 1.0, 0.001); // 001
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[2]), 0.0, 0.001); // 010
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[3]), 0.0, 0.001); // 011
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[4]), 0.0, 0.001); // 100
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[5]), 0.0, 0.001); // 101
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[6]), 0.0, 0.001); // 110
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[7]), 0.0, 0.001); // 111
 
     free_statevec(result_sv);
     free_statevec(sv);
@@ -190,10 +188,10 @@ void test_evolve_CNOT_gate_00(void)
     free_list(targets);
 
     // Expected: |00>
-    CU_ASSERT_DOUBLE_EQUAL(*result_sv->data[0]->a, 1.0, 0.001); // |00>
-    CU_ASSERT_DOUBLE_EQUAL(*result_sv->data[3]->a, 0.0, 0.001); // |11>
-    CU_ASSERT_DOUBLE_EQUAL(*result_sv->data[1]->a, 0.0, 0.001); // |01>
-    CU_ASSERT_DOUBLE_EQUAL(*result_sv->data[2]->a, 0.0, 0.001); // |10>
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[0]), 1.0, 0.001); // |00>
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[3]), 0.0, 0.001); // |11>
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[1]), 0.0, 0.001); // |01>
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[2]), 0.0, 0.001); // |10>
 
     free_statevec(result_sv);
     free_statevec(sv);
@@ -221,10 +219,10 @@ void test_evolve_CNOT_gate_11(void)
     free_statevec(ket11);
 
     // Expected: |01>
-    CU_ASSERT_DOUBLE_EQUAL(*(double *)result_sv->data[0]->a, 0.0, 0.001); // |00>
-    CU_ASSERT_DOUBLE_EQUAL(*(double *)result_sv->data[3]->a, 0.0, 0.001); // |11>
-    CU_ASSERT_DOUBLE_EQUAL(*(double *)result_sv->data[1]->a, 1.0, 0.001); // |01>
-    CU_ASSERT_DOUBLE_EQUAL(*(double *)result_sv->data[2]->a, 0.0, 0.001); // |10>
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[0]), 0.0, 0.001); // |00>
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[3]), 0.0, 0.001); // |11>
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[1]), 1.0, 0.001); // |01>
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[2]), 0.0, 0.001); // |10>
 
     free_statevec(result_sv);
     free_gate(cnot_gate);
@@ -244,10 +242,10 @@ void test_evolve_CCNOT_gate(void)
     free_list(targets);
 
     // Expected: |000>
-    CU_ASSERT_DOUBLE_EQUAL(*(double *)result_sv->data[0]->a, 1.0, 0.001); // |000>
-    CU_ASSERT_DOUBLE_EQUAL(*(double *)result_sv->data[7]->a, 0.0, 0.001); // |111>
-    CU_ASSERT_DOUBLE_EQUAL(*(double *)result_sv->data[3]->a, 0.0, 0.001); // |011>
-    CU_ASSERT_DOUBLE_EQUAL(*(double *)result_sv->data[4]->a, 0.0, 0.001); // |100>
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[0]), 1.0, 0.001); // |000>
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[7]), 0.0, 0.001); // |111>
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[3]), 0.0, 0.001); // |011>
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[4]), 0.0, 0.001); // |100>
 
     free_statevec(result_sv);
     free_gate(ccnot_gate);
@@ -266,8 +264,8 @@ void test_evolve_Hadamard_gate(void)
     free_list(targets);
 
     // Expected: superposition |0> + |1>
-    CU_ASSERT_DOUBLE_EQUAL(*result_sv->data[0]->a, sqrt(0.5), 0.001);
-    CU_ASSERT_DOUBLE_EQUAL(*result_sv->data[1]->a, sqrt(0.5), 0.001);
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[0]), sqrt(0.5), 0.001);
+    CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[1]), sqrt(0.5), 0.001);
 
     free_statevec(result_sv);
     free_statevec(sv);
