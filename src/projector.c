@@ -33,33 +33,33 @@ int get_nqubits_from_proj_id(enum PROJECTOR proj)
     }
 }
 
-struct Complex **proj_ZERO(void)
+double complex*proj_ZERO(void)
 {
     size_t size = 1 << 1;
-    struct Complex **data = xmalloc(size * size * sizeof(struct Complex *));
-    data[0] = init_complex(1., 0.);
-    data[1] = init_complex(0., 0.);
-    data[2] = init_complex(0., 0.);
-    data[3] = init_complex(0., 0.);
+    double complex *data = xmalloc(size * size * sizeof(double complex));
+    data[0] = 1;
+    data[1] = 0;
+    data[2] = 0;
+    data[3] = 0;
     return data;
 }
 
-struct Complex **proj_ONE(void)
+double complex*proj_ONE(void)
 {
     size_t size = 1 << 1;
-    struct Complex **data = xmalloc(size * size * sizeof(struct Complex *));
-    data[0] = init_complex(0., 0.);
-    data[1] = init_complex(0., 0.);
-    data[2] = init_complex(0., 0.);
-    data[3] = init_complex(1., 0.);
+    double complex *data = xmalloc(size * size * sizeof(double complex));
+    data[0] = 0;
+    data[1] = 0;
+    data[2] = 0;
+    data[3] = 1;
     return data;
 }
 
 
-struct Complex **get_data_from_proj_id(enum PROJECTOR proj)
+double complex*get_data_from_proj_id(enum PROJECTOR proj)
 {
     size_t size = 1 << get_nqubits_from_proj_id(proj);
-    struct Complex **data = NULL;
+    double complex *data = NULL;
     switch (proj)
     {
     case ZERO:
