@@ -76,3 +76,81 @@ struct Statevec *evolve_single(struct Statevec *sv, struct Gate *gate, unsigned 
 
     return result_sv;
 }
+
+struct Statevec *evolve(struct Statevec *sv, struct Gate *gate, struct List *targets)
+{
+    if (gate == NULL || sv == NULL || targets == NULL)
+    {
+        return NULL;
+    }
+
+    unsigned char nqubits_sv = sv->nqubits;
+    unsigned char nqubits_gate = gate->nqubits;
+    size_t nTargets = list_size(targets);
+
+    if (nqubits_gate != nTargets)
+    {
+        fprintf(stderr, "The number of targets is not consistant with the gate.\n");
+        print_gate(gate);
+        return NULL;
+    }
+
+    int mask = 0;
+
+    struct List *tmp_targets = targets;
+    while (tmp_targets)
+    {
+        int *target = tmp_targets->data;
+        mask |= (1 << (int) nqubits_sv - *target - 1);
+        tmp_targets = tmp_targets->next;
+    }
+
+    int size = 1 << nqubits_sv;
+    struct Complex **new_data = xmalloc(size * sizeof(struct Complex*));
+    for (int i = 0; i < size; ++i)
+    {
+        int i_base = i & ~mask;
+        struct Complex *sum = init_complex(0., 0.);
+        for (int j = 0; j < (1 << nqubits_gate); ++j)
+        {
+            int maskJ = 0;
+            for (int t = 0; t < nTargets; ++t)
+            {
+                int bit = (j >> (nTargets - t - 1)) & 1;
+                struct List *list_element = list_get(targets, t);
+                int *target = list_element->data;
+                int bitmask = bit << (nqubits_sv - *target - 1);
+                maskJ |= bitmask;
+            }
+            int index = i_base | maskJ;
+            int rowIndex = 0;
+            for (int t = 0; t < nTargets; ++t)
+            {
+                struct List *list_element = list_get(targets, t);
+                int *target = list_element->data;
+                int bit = (i >> (nqubits_sv - *target - 1)) & 1;
+                bit = bit << nTargets - t - 1;
+                rowIndex |= bit;
+            }
+
+            int colIndex = j;
+
+            int data_index = rowIndex * (1 << nqubits_gate) + colIndex; // Debug
+            struct Complex *contrib = complex_mul(gate->data[data_index], sv->data[index]);
+            struct Complex *new_sum = complex_add(sum, contrib);
+
+            free_complex(sum);
+            free_complex(contrib);
+
+            sum = new_sum;
+        }
+
+        new_data[i] = sum;
+    }
+
+    struct Statevec *result_sv = xmalloc(sizeof(struct Statevec));
+    result_sv->nqubits = sv->nqubits;
+    result_sv->data = new_data;
+
+    return result_sv;
+}

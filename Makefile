@@ -3,7 +3,7 @@ CC = gcc -std=c99
 CFLAGS = -Wextra -Wall
 FILES = main.c src/utils/*.c src/*.c
 COMPLEX_TEST = src/utils/alloc.c src/utils/complex.c tests/test_complex.c
-STATEVEC_TEST = src/utils/alloc.c src/utils/complex.c src/statevec.c src/gate.c tests/test_statevec.c
+STATEVEC_TEST = src/utils/alloc.c src/utils/list.c src/utils/complex.c src/statevec.c src/gate.c tests/test_statevec.c
 GATE_TEST = src/utils/alloc.c src/utils/complex.c src/gate.c tests/test_gate.c
 LIST_TEST = src/utils/alloc.c src/utils/list.c tests/test_list.c
 LIBTEST = -lcunit
