@@ -150,7 +150,6 @@ void print_data(enum BUILTIN_TYPES data_type, void *data)
 
 void list_print(struct List *list, enum BUILTIN_TYPES data_type)
 {
-    printf("\n");
     struct List *ptr = list;
     while (ptr)
     {
