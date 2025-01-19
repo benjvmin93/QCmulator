@@ -1,5 +1,6 @@
 #include "../src/headers/statevec.h"
 #include "../src/headers/gate.h"
+#include "../src/headers/alloc.h"
 #include "../src/headers/list.h"
 
 #include <CUnit/CUnit.h>
