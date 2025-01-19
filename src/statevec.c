@@ -4,6 +4,9 @@
 #include "headers/projector.h"
 
 #include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+#include <time.h>
 
 void printBinary(int num) {
     for (int i = sizeof(int) * 8 - 1; i >= 0; i--) {
@@ -21,7 +24,7 @@ struct Statevec *init_statevec(unsigned char nqubits)
 
     struct Statevec *sv = xmalloc(sizeof(struct Statevec));
     sv->nqubits = nqubits;
-    sv->measurements = NULL;
+    sv->measurements = xcalloc(sizeof(bool *), nqubits);
     size_t size = 1 << nqubits;
     
     sv->data = xmalloc(size * sizeof(double complex));
@@ -36,16 +39,19 @@ struct Statevec *init_statevec(unsigned char nqubits)
 
 void free_statevec(struct Statevec *sv)
 {
-    if (sv->measurements)
+    for (size_t i = 0; i < sv->nqubits; ++i)
     {
-        free_list(sv->measurements);
+        if (sv->measurements[i] != NULL)
+        {
+            free(sv->measurements[i]);
+        }
     }
-
+    free(sv->measurements);
     free(sv->data);
     free(sv);
 }
 
-struct Statevec *evolve_single(struct Statevec *sv, struct Gate *gate, unsigned char target)
+struct Statevec *evolve_single(struct Statevec *sv, double complex *gate, unsigned char target)
 {
     if (gate == NULL || sv == NULL)
     {
@@ -64,13 +70,20 @@ struct Statevec *evolve_single(struct Statevec *sv, struct Gate *gate, unsigned 
         int index_cell0 = i & ~mask;
         int index_cell1 = i | mask;
 
-        new_data[i] = gate->data[index_op_high] * sv->data[index_cell0] + gate->data[index_op_high | 1] * sv->data[index_cell1];
+        new_data[i] = gate[index_op_high] * sv->data[index_cell0] + gate[index_op_high | 1] * sv->data[index_cell1];
     }
 
     struct Statevec *result_sv = xmalloc(sizeof(struct Statevec));
     result_sv->nqubits = sv->nqubits;
     result_sv->data = new_data;
-    result_sv->measurements = sv->measurements;
+    result_sv->measurements = xcalloc(sizeof(bool *), nqubits);
+    for (size_t i = 0; i < nqubits; ++i)
+    {
+        if (sv->measurements[i])
+        {
+            result_sv->measurements[i] = bool_alloc(sv->measurements[i]);
+        }
+    }
 
     return result_sv;
 }
@@ -143,7 +156,14 @@ struct Statevec *evolve(struct Statevec *sv, struct Gate *gate, struct List *tar
     struct Statevec *result_sv = xmalloc(sizeof(struct Statevec));
     result_sv->nqubits = sv->nqubits;
     result_sv->data = new_data;
-    result_sv->measurements = sv->measurements;
+    result_sv->measurements = xcalloc(sizeof(bool *), nqubits_sv);
+    for (size_t i = 0; i < nqubits_sv; ++i)
+    {
+        if (sv->measurements[i])
+        {
+            result_sv->measurements[i] = bool_alloc(sv->measurements[i]);
+        }
+    }
 
     return result_sv;
 }
@@ -159,30 +179,76 @@ struct List *init_measurement_list(struct Statevec *sv)
     }
 }
 
-float statevec_norm(struct Statevec *sv)
+double statevec_norm(struct Statevec *sv)
 {
+    size_t size = 1 << sv->nqubits;
+    double complex *data = sv->data;
 
+    double norm = 0.0;
+
+    for (size_t i = 0; i < size; ++i) {
+        norm += cabs(data[i]);
+    }
+
+    return sqrt(norm);
 }
 
 struct Statevec *normalize(struct Statevec *sv)
 {
+    double norm = statevec_norm(sv);
+    size_t size = 1 << sv->nqubits;
 
-}
-
-float expectation_proj(struct Statevec *sv, enum PROJECTOR proj)
-{
-
-}
-
-struct List *measure(struct Statevec *sv, enum PROJECTOR proj, int target)
-{
-    struct List *measurements = sv->measurements;
-    if (!measurements)
+    for (size_t i = 0; i < size; ++i)
     {
-        measurements = init_measurement_list(sv);
+        sv->data[i] /= norm;
     }
 
-    
+    return sv;
+}
 
+double complex expectation_proj(struct Statevec *sv, enum PROJECTOR proj, int target)
+{
+    sv = normalize(sv);
+
+    double complex *p = get_data_from_proj_id(proj);
+    struct Statevec *projected = evolve_single(sv, p, target);
+
+    double complex res = 0;
+    for (size_t i = 0; i < 1 << sv->nqubits; ++i)
+    {
+        res += conj(sv->data[i]) * projected->data[i];
+    }
+
+    return res;
+}
+
+double drand(double low, double high)
+{
+    srand(time(NULL));
+    return ((double)rand() * (high - low)) / (double)RAND_MAX + low;
+}
+
+struct Statevec *measure(struct Statevec *sv, enum PROJECTOR proj, int target)
+{
+    if (sv->measurements[target] != NULL)
+    {
+        fprintf(stderr, "Qubit %d already measured.", target);
+        return sv;
+    }
+
+    double prob = cabs(expectation_proj(sv, proj, target));
+    double rand = drand(0., 1.);
     
+    if (rand > prob)
+    {
+        proj = ONE;
+    }
+
+    struct Projector *p = init_projector(proj);
+    struct Statevec *projected = evolve_single(sv, p->data, target);
+    free_projector(p);
+
+    projected->measurements[target] = bool_alloc(proj == ONE ? true : false);
+
+    return projected;
 }

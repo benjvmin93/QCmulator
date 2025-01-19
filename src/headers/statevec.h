@@ -5,17 +5,18 @@
 #include "list.h"
 
 #include <complex.h>
+#include <stdbool.h>
 
 struct Statevec
 {
     double complex *data;
-    struct List *measurements;
+    bool **measurements;
     unsigned char nqubits;
 };
 
 struct Statevec *init_statevec(unsigned char nqubits);
 void free_statevec(struct Statevec *sv);
-struct Statevec *evolve_single(struct Statevec *sv, struct Gate *gate, unsigned char target);
+struct Statevec *evolve_single(struct Statevec *sv, double complex *gate, unsigned char target);
 struct Statevec *evolve(struct Statevec *sv, struct Gate *gate, struct List *targets);
 
 #endif

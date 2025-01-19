@@ -88,7 +88,7 @@ void test_evolve_single_X_gate(void)
     struct Gate *x_gate = init_gate(X, NULL);
 
     // Apply X gate to the first qubit
-    struct Statevec *result_sv = evolve_single(sv, x_gate, 0);
+    struct Statevec *result_sv = evolve_single(sv, x_gate->data, 0);
 
     // Expected result: |10> state
     CU_ASSERT_EQUAL(result_sv->data[0], 0);
@@ -96,8 +96,8 @@ void test_evolve_single_X_gate(void)
     CU_ASSERT_EQUAL(result_sv->data[2], 1);
     CU_ASSERT_EQUAL(result_sv->data[3], 0);
 
-    free_statevec(result_sv);
     free_statevec(sv);
+    free_statevec(result_sv);
     free_gate(x_gate);
 }
 
@@ -108,7 +108,7 @@ void test_evolve_single_H_gate(void)
     struct Gate *h_gate = init_gate(H, NULL);
 
     // Apply H gate
-    struct Statevec *result_sv = evolve_single(sv, h_gate, 0);
+    struct Statevec *result_sv = evolve_single(sv, h_gate->data, 0);
 
     // Expected result: superposition |0> + |1>
     CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[0]), sqrt(0.5), 0.001);
@@ -127,7 +127,7 @@ void test_evolve_single_RY_gate(void)
     struct Gate *ry_gate = init_gate(RY, &theta);
 
     // Apply RY gate
-    struct Statevec *result_sv = evolve_single(sv, ry_gate, 0);
+    struct Statevec *result_sv = evolve_single(sv, ry_gate->data, 0);
 
     // Expected result: |1>
     CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[0]), 0., 0.001);
@@ -145,7 +145,7 @@ void test_evolve_single_target_qubit(void)
     struct Gate *x_gate = init_gate(X, NULL);
 
     // Apply X gate to the last qubit
-    struct Statevec *result_sv = evolve_single(sv, x_gate, 2);
+    struct Statevec *result_sv = evolve_single(sv, x_gate->data, 2);
 
     // Verify the state vector after applying X gate
     CU_ASSERT_DOUBLE_EQUAL(creal(result_sv->data[0]), 0.0, 0.001); // 000
@@ -204,9 +204,9 @@ void test_evolve_CNOT_gate_11(void)
     unsigned char nqubits = 2;
     struct Statevec *sv = init_statevec(nqubits);
     struct Gate *x_gate = init_gate(X, NULL);    
-    struct Statevec *ket10 = evolve_single(sv, x_gate, 0);
+    struct Statevec *ket10 = evolve_single(sv, x_gate->data, 0);
     free_statevec(sv);
-    struct Statevec *ket11 = evolve_single(ket10, x_gate, 1);
+    struct Statevec *ket11 = evolve_single(ket10, x_gate->data, 1);
     free_statevec(ket10);
     free_gate(x_gate);
 
