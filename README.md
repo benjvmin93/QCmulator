@@ -1,23 +1,36 @@
 # QCmulator
 
-This project aims to emulate a quantum computer as a state vector emulation using C language. It aims to be as efficient as possible in terms of memory management and computing speed.
+QCmulator is a project aimed at emulating a quantum computer using state vector simulation in the C programming language. The primary focus is on achieving high efficiency in terms of memory management and computing speed. This project leverages skills I acquired during my studies at EPITA in C programming and quantum technologies, as well as my working experience at Inria. Developing everything from scratch with an emphasis on runtime and memory efficiency made this project particularly enjoyable to implement.
 
-It groups skills I have acquired during my studies at EPITA (C programming / quantum technologies) and my working experience at Inria.
-Developing everything from scratch emphasizing efficiency in term of runtime and memory management made this project very enjoyable to implement.
+## Architecture
 
-# Architecture
+The project is structured as follows:
 
 ```
-  - src/*.c : source files
-  - src/headers/*.h : contains all the header files
-  - src/utils/*.c : contains utility functions
+- src/*.c : Source files containing the main implementation.
+- src/headers/*.h : Header files defining the interfaces and data structures.
+- src/utils/*.c : Utility functions to support the main implementation.
 ```
 
-To represent complex matrices or vectors, I choosed using `double complex *` so it remains a very simple data type to treat as a 1D pointer.
+To represent complex matrices or vectors, the project uses `double complex *`, which allows for simple and efficient handling as a 1D pointer.
 
-# TODO
+## Features
 
-1. Finish simulator implementation: make sure everything works fine by adding a bunch of unit tests.
-2. Add a circuit model overlay to run instruction with the statevector simulator.
-3. Develop a benchmark to compare the efficiency of the simulator in order to assess bottlenecks and eventually start optimizing processes (multithreading, adhoc functions...)
-4. Eventually build a Python API to make a gateway between the C project and a Python program.
+- **Efficient Memory Management**: Optimized for minimal memory usage.
+- **High Computing Speed**: Designed to perform computations as quickly as possible.
+- **Modular Design**: Clear separation of source files, headers, and utility functions for maintainability.
+
+## TODO
+
+1. **Complete Simulator Implementation**: Ensure the simulator works correctly by adding comprehensive unit tests.
+2. **Circuit Model Overlay**: Implement a circuit model to run instructions with the state vector simulator.
+3. **Benchmarking and Optimization**: Develop benchmarks to assess the simulator's efficiency, identify bottlenecks, and optimize processes (e.g., multithreading, ad-hoc functions).
+4. **Python API**: Build a Python API to create a gateway between the C project and Python programs, enhancing usability and integration.
+
+## Contributing
+
+Contributions are welcome! If you have any ideas, suggestions, or bug reports, please open an issue or submit a pull request.
+
+## License
+
+This project is licensed under the GPL-3.0 License. See the [LICENSE](LICENSE) file for details.
