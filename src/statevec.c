@@ -47,12 +47,8 @@ struct Statevec *init_statevec(unsigned char nqubits)
     sv->measurements = xcalloc(sizeof(bool *), nqubits);
     size_t size = 1 << nqubits;
     
-    sv->data = xmalloc(size * sizeof(double complex));
+    sv->data = xcalloc(sizeof(double complex), size);
     sv->data[0] = 1;
-    for (size_t i = 1; i < size; ++i)
-    {
-        sv->data[i] = 0;
-    }
 
     return sv;
 }
@@ -195,12 +191,32 @@ struct Statevec *normalize(struct Statevec *sv)
     return sv;
 }
 
+struct Statevec *copy_statevec(struct Statevec *sv)
+{
+    struct Statevec *sv_copy = init_statevec(sv->nqubits);
+    for (size_t i = 0; i < 1 << sv->nqubits; ++i)
+    {
+        sv_copy->data[i] = sv->data[i];
+    }
+
+    for (size_t i = 0; i < sv->nqubits; ++i)
+    {
+        if (sv->measurements[i] != NULL)
+        {
+            sv_copy->measurements[i] = bool_alloc(*sv->measurements[i]);
+        }
+    }
+
+    return sv_copy;
+}
+
 double complex expectation_proj(struct Statevec *sv, enum PROJECTOR proj, int target)
 {
     sv = normalize(sv);
 
+    struct Statevec *projected = copy_statevec(sv);
     double complex *p = get_data_from_proj_id(proj);
-    struct Statevec *projected = evolve_single(sv, p, target);
+    projected = evolve_single(projected, p, target);
     free(p);
 
     double complex res = 0;
@@ -236,10 +252,10 @@ struct Statevec *measure(struct Statevec *sv, enum PROJECTOR proj, int target)
     }
 
     struct Projector *p = init_projector(proj);
-    struct Statevec *projected = evolve_single(sv, p->data, target);
+    sv = evolve_single(sv, p->data, target);
     free_projector(p);
 
-    projected->measurements[target] = bool_alloc(proj == ONE ? true : false);
+    sv->measurements[target] = bool_alloc(proj == ONE ? true : false);
 
-    return projected;
+    return sv;
 }
