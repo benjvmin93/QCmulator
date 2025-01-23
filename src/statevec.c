@@ -7,6 +7,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 
 void print_statevec(struct Statevec *sv)
 {
@@ -74,7 +75,7 @@ struct Statevec *evolve_single(struct Statevec *sv, double complex *gate, unsign
 {
     if (gate == NULL || sv == NULL)
     {
-        return NULL;
+        return sv;
     }
 
     unsigned char nqubits = sv->nqubits;
@@ -91,27 +92,17 @@ struct Statevec *evolve_single(struct Statevec *sv, double complex *gate, unsign
 
         new_data[i] = gate[index_op_high] * sv->data[index_cell0] + gate[index_op_high | 1] * sv->data[index_cell1];
     }
+    free(sv->data);
+    sv->data = new_data;
 
-    struct Statevec *result_sv = xmalloc(sizeof(struct Statevec));
-    result_sv->nqubits = sv->nqubits;
-    result_sv->data = new_data;
-    result_sv->measurements = xcalloc(sizeof(bool *), nqubits);
-    for (size_t i = 0; i < nqubits; ++i)
-    {
-        if (sv->measurements[i])
-        {
-            result_sv->measurements[i] = bool_alloc(sv->measurements[i]);
-        }
-    }
-
-    return result_sv;
+    return sv;
 }
 
 struct Statevec *evolve(struct Statevec *sv, struct Gate *gate, struct List *targets)
 {
     if (gate == NULL || sv == NULL || targets == NULL)
     {
-        return NULL;
+        return sv;
     }
 
     unsigned char nqubits_sv = sv->nqubits;
@@ -122,7 +113,7 @@ struct Statevec *evolve(struct Statevec *sv, struct Gate *gate, struct List *tar
     {
         fprintf(stderr, "The number of targets is not consistant with the gate.\n");
         print_gate(gate);
-        return NULL;
+        return sv;
     }
 
     int mask = 0;
@@ -171,31 +162,10 @@ struct Statevec *evolve(struct Statevec *sv, struct Gate *gate, struct List *tar
 
         new_data[i] = sum;
     }
+    free(sv->data);
+    sv->data = new_data;
 
-    struct Statevec *result_sv = xmalloc(sizeof(struct Statevec));
-    result_sv->nqubits = sv->nqubits;
-    result_sv->data = new_data;
-    result_sv->measurements = xcalloc(sizeof(bool *), nqubits_sv);
-    for (size_t i = 0; i < nqubits_sv; ++i)
-    {
-        if (sv->measurements[i])
-        {
-            result_sv->measurements[i] = bool_alloc(sv->measurements[i]);
-        }
-    }
-
-    return result_sv;
-}
-
-struct List *init_measurement_list(struct Statevec *sv)
-{
-    struct List *m = init_list(sizeof(int), 1 << sv->nqubits);
-    struct List *tmp = m;
-    while (tmp)
-    {
-        tmp->data = int_alloc(0);
-        tmp = tmp->next;
-    }
+    return sv;
 }
 
 double statevec_norm(struct Statevec *sv)
@@ -231,6 +201,7 @@ double complex expectation_proj(struct Statevec *sv, enum PROJECTOR proj, int ta
 
     double complex *p = get_data_from_proj_id(proj);
     struct Statevec *projected = evolve_single(sv, p, target);
+    free(p);
 
     double complex res = 0;
     for (size_t i = 0; i < 1 << sv->nqubits; ++i)
@@ -238,6 +209,7 @@ double complex expectation_proj(struct Statevec *sv, enum PROJECTOR proj, int ta
         res += conj(sv->data[i]) * projected->data[i];
     }
 
+    free_statevec(projected);
     return res;
 }
 
