@@ -47,4 +47,4 @@ debug: ${LIB_NAME}
 
 # Clean up
 clean:
-	rm -f main run-test-statevec run-test-gate run-test-list dbg *.o ${LIB_NAME}
+	rm -f main run-test-statevec run-test-gate run-test-list run-test-circuit dbg *.o ${LIB_NAME}
