@@ -71,6 +71,21 @@ size_t list_size(struct List *head)
     return size;
 }
 
+size_t list_length(struct List *head)
+{
+    size_t length = 0;
+    struct List *ptr = head;
+    while (ptr)
+    {
+        if (ptr->data)
+        {
+            length++;
+        }
+        ptr = ptr->next;
+    }
+    return length;
+}
+
 struct List *list_append(struct List *head, void *data)
 {
     if (!head)
