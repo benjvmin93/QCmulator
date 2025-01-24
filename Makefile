@@ -12,6 +12,7 @@ UTIL_FILES = src/utils/alloc.c src/utils/list.c
 STATEVEC_TEST = ${UTIL_FILES} src/statevec.c src/gate.c src/projector.c tests/test_statevec.c
 GATE_TEST = ${UTIL_FILES} src/gate.c tests/test_gate.c
 LIST_TEST = ${UTIL_FILES} tests/test_list.c
+CIRCUIT_TEST = ${UTIL_FILES} src/gate.c src/circuit.c tests/test_circuit.c
 
 # Build targets
 LIB_NAME = libquantum.a
@@ -36,6 +37,9 @@ test-gate: ${LIB_NAME}
 
 test-list: ${LIB_NAME}
 	${CC} -fsanitize=address -o run-test-list -g ${LIST_TEST} ${LIB_NAME} ${LIBTEST} ${LIBS}
+
+test-circuit: ${LIB_NAME}
+	${CC} -fsanitize=address -o run-test-circuit -g ${CIRCUIT_TEST} ${LIB_NAME} ${LIBTEST} ${LIBS}
 
 # Debug build
 debug: ${LIB_NAME}

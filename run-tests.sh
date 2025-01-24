@@ -6,7 +6,7 @@ GREEN='\033[0;32m'
 NC='\033[0m' # No color
 
 # Array of test targets
-tests=("test-statevec" "test-gate" "test-list")
+tests=("test-statevec" "test-gate" "test-list" "test-circuit")
 
 # Function to run a test and check the result
 run_test() {

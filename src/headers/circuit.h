@@ -21,5 +21,6 @@ struct Circuit
 
 struct Circuit *init_circuit(unsigned char nqubits);
 void free_circuit(struct Circuit *circuit);
+struct Circuit *add_gate(struct Circuit *circuit, enum GATE gate_id, double *theta, struct List *targets);
 
 #endif

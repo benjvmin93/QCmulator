@@ -6,10 +6,11 @@
 struct Instruction *init_instruction(enum GATE gate_id, double *theta, struct List *targets)
 {
     struct Gate *gate = init_gate(gate_id, theta);
-    size_t ntargets = list_size(targets);
+    size_t ntargets = list_length(targets);
     if (gate->nqubits != ntargets)
     {
-        fprintf(stderr, "Can't initialize %s with %ld targets.", gate_id_to_str(gate_id), ntargets);
+        fprintf(stderr, "Can't initialize %s gate (%d qubit gate) with %ld targets.", gate_id_to_str(gate_id), gate->nqubits, ntargets);
+        free_gate(gate);
         return NULL;
     }
 
@@ -30,7 +31,7 @@ void free_instruction(struct Instruction *instruction)
 struct Circuit *init_circuit(unsigned char nqubits)
 {
     struct Circuit *circuit = xmalloc(sizeof(struct Circuit));
-    circuit->instructions = init_list(sizeof(int), 0);
+    circuit->instructions = init_list(sizeof(struct Instruction *), 0);
     circuit->nqubits = nqubits;
 
     return circuit;
@@ -38,7 +39,19 @@ struct Circuit *init_circuit(unsigned char nqubits)
 
 void free_circuit(struct Circuit *circuit)
 {
-    free_list(circuit->instructions);
+    struct List *head_instr = circuit->instructions;
+
+    while (head_instr)
+    {
+        struct Instruction *instr = (struct Instruction *) head_instr->data;
+        if (instr)
+        {
+            free_instruction(instr);
+        }
+        struct List *tmp = head_instr;
+        head_instr = head_instr->next;
+        free(tmp);
+    }
     free(circuit);
 }
 
