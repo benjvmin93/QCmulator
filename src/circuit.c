@@ -68,3 +68,56 @@ struct Circuit *add_gate(struct Circuit *circuit, enum GATE gate_id, double *the
 
     return circuit;
 }
+
+struct Circuit *x(struct Circuit *c, int target)
+{
+    void *t[] = { int_alloc(target) };
+    return add_gate(c, X, NULL, init_list_from_array(t, 1, sizeof(int)));
+}
+struct Circuit *y(struct Circuit *c, int target)
+{
+    void *t[] = { int_alloc(target) };
+    return add_gate(c, Y, NULL, init_list_from_array(t, 1, sizeof(int)));
+}
+struct Circuit *z(struct Circuit *c, int target)
+{
+    void *t[] = { int_alloc(target) };
+    return add_gate(c, Z, NULL, init_list_from_array(t, 1, sizeof(int)));
+}
+struct Circuit *h(struct Circuit *c, int target)
+{
+    void *t[] = { int_alloc(target) };
+    return add_gate(c, H, NULL, init_list_from_array(t, 1, sizeof(int)));
+}
+struct Circuit *rx(struct Circuit *c, double theta, int target)
+{
+    void *t[] = { int_alloc(target) };
+    return add_gate(c, X, &theta, init_list_from_array(t, 1, sizeof(int)));
+}
+struct Circuit *ry(struct Circuit *c, double theta, int target)
+{
+    void *t[] = { int_alloc(target) };
+    return add_gate(c, X, &theta, init_list_from_array(t, 1, sizeof(int)));
+}
+struct Circuit *rz(struct Circuit *c, double theta, int target)
+{
+    void *t[] = { int_alloc(target) };
+    return add_gate(c, X, &theta, init_list_from_array(t, 1, sizeof(int)));
+}
+
+struct Circuit *cx(struct Circuit *c, int q0, int q1)
+{
+    void *t[] = { int_alloc(q0), int_alloc(q1) };
+    return add_gate(c, CX, NULL, init_list_from_array(t, 2, sizeof(int)));
+}
+struct Circuit *cz(struct Circuit *c, int q0, int q1)
+{
+    void *t[] = { int_alloc(q0), int_alloc(q1) };
+    return add_gate(c, CZ, NULL, init_list_from_array(t, 2, sizeof(int)));
+}
+
+struct Circuit *ccx(struct Circuit *c, int q0, int q1, int q2)
+{
+    void *t[] = { int_alloc(q0), int_alloc(q1), int_alloc(q2) };
+    return add_gate(c, CCX, NULL, init_list_from_array(t, 3, sizeof(int)));
+}
