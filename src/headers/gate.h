@@ -27,6 +27,7 @@ struct Gate
 
 struct Gate *get_nqubits_from_gate_id(struct Gate* gate);
 struct Gate *get_data_from_gate_id(struct Gate *gate, double *theta);
+char *gate_id_to_str(enum GATE id);
 
 struct Gate *init_gate(enum GATE id, double *alpha);
 void free_gate(struct Gate *gate);
