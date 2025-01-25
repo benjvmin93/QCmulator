@@ -83,7 +83,7 @@ void test_single_qubit_gates()
     CU_ASSERT_PTR_NOT_NULL(instr);
     CU_ASSERT_EQUAL(instr->gate->id, X);
     CU_ASSERT_EQUAL(list_length(instr->targets), 1);
-    CU_ASSERT_EQUAL(*(int *)list_get(instr->targets, 0), 0);
+    CU_ASSERT_EQUAL(*(int *)list_get(instr->targets, 0)->data, 0);
 
     circuit = h(circuit, 1);
     CU_ASSERT_EQUAL(list_length(circuit->instructions), 2);
