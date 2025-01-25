@@ -73,6 +73,73 @@ void test_invalid_gate()
     free_list(targets);
 }
 
+void test_single_qubit_gates()
+{
+    struct Circuit *circuit = init_circuit(2);
+
+    circuit = x(circuit, 0);
+    CU_ASSERT_EQUAL(list_length(circuit->instructions), 1);
+    struct Instruction *instr = (struct Instruction *)list_get(circuit->instructions, 0)->data;
+    CU_ASSERT_PTR_NOT_NULL(instr);
+    CU_ASSERT_EQUAL(instr->gate->id, X);
+    CU_ASSERT_EQUAL(list_length(instr->targets), 1);
+    CU_ASSERT_EQUAL(*(int *)list_get(instr->targets, 0), 0);
+
+    circuit = h(circuit, 1);
+    CU_ASSERT_EQUAL(list_length(circuit->instructions), 2);
+    instr = (struct Instruction *)list_get(circuit->instructions, 1)->data;
+    CU_ASSERT_EQUAL(instr->gate->id, H);
+    CU_ASSERT_EQUAL(*(int *)list_get(instr->targets, 0)->data, 1);
+
+    free_circuit(circuit);
+}
+
+void test_parametrized_gates()
+{
+    struct Circuit *circuit = init_circuit(2);
+
+    double theta = 3.14; // Example parameter
+    circuit = rx(circuit, theta, 0);
+    CU_ASSERT_EQUAL(list_size(circuit->instructions), 1);
+    struct Instruction *instr = (struct Instruction *)list_get(circuit->instructions, 0)->data;
+    CU_ASSERT_EQUAL(instr->gate->id, X);
+    CU_ASSERT_EQUAL(list_size(instr->targets), 1);
+    CU_ASSERT_EQUAL(*(int *)list_get(instr->targets, 0)->data, 0);
+
+    circuit = rz(circuit, theta, 1);
+    CU_ASSERT_EQUAL(list_size(circuit->instructions), 2);
+    instr = (struct Instruction *)list_get(circuit->instructions, 1)->data;
+    CU_ASSERT_EQUAL(instr->gate->id, X);
+    CU_ASSERT_EQUAL(list_size(instr->targets), 1);
+    CU_ASSERT_EQUAL(*(int *)list_get(instr->targets, 0)->data, 1);
+
+    free_circuit(circuit);
+}
+
+void test_multi_qubit_gates()
+{
+    struct Circuit *circuit = init_circuit(3);
+
+    circuit = cx(circuit, 0, 1);
+    CU_ASSERT_EQUAL(list_size(circuit->instructions), 1);
+    struct Instruction *instr = (struct Instruction *)list_get(circuit->instructions, 0)->data;
+    CU_ASSERT_EQUAL(instr->gate->id, CX);
+    CU_ASSERT_EQUAL(list_size(instr->targets), 2);
+    CU_ASSERT_EQUAL(*(int *)list_get(instr->targets, 0)->data, 0);
+    CU_ASSERT_EQUAL(*(int *)list_get(instr->targets, 1)->data, 1);
+
+    circuit = ccx(circuit, 0, 1, 2);
+    CU_ASSERT_EQUAL(list_size(circuit->instructions), 2);
+    instr = (struct Instruction *)list_get(circuit->instructions, 1)->data;
+    CU_ASSERT_EQUAL(instr->gate->id, CCX);
+    CU_ASSERT_EQUAL(list_size(instr->targets), 3);
+    CU_ASSERT_EQUAL(*(int *)list_get(instr->targets, 0)->data, 0);
+    CU_ASSERT_EQUAL(*(int *)list_get(instr->targets, 1)->data, 1);
+    CU_ASSERT_EQUAL(*(int *)list_get(instr->targets, 2)->data, 2);
+
+    free_circuit(circuit);
+}
+
 int main()
 {
     // Initialize the CUnit test registry
@@ -91,7 +158,10 @@ int main()
     if ((CU_add_test(suite, "test_init_instruction", test_init_instruction) == NULL) ||
         (CU_add_test(suite, "test_init_circuit", test_init_circuit) == NULL) ||
         (CU_add_test(suite, "test_add_gate", test_add_gate) == NULL) ||
-        (CU_add_test(suite, "test_invalid_gate", test_invalid_gate) == NULL))
+        (CU_add_test(suite, "test_invalid_gate", test_invalid_gate) == NULL) ||
+        (CU_add_test(suite, "test_single_qubit_gates", test_single_qubit_gates) == NULL) ||
+        (CU_add_test(suite, "test_parametrized_gates", test_parametrized_gates) == NULL) ||
+        (CU_add_test(suite, "test_multi_qubit_gates", test_multi_qubit_gates) == NULL))
     {
         CU_cleanup_registry();
         return CU_get_error();

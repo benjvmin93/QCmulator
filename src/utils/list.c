@@ -88,11 +88,6 @@ size_t list_length(struct List *head)
 
 struct List *list_append(struct List *head, void *data)
 {
-    if (!head)
-    {
-        return NULL;
-    }
-
     if (!head->data && head->next == NULL)
     {
         head->data = data;
@@ -127,9 +122,12 @@ void list_set(struct List *head, size_t index, void *data)
 struct List *list_get(struct List *head, size_t index)
 {
     struct List *ptr = head;
-
     for (size_t i = 0; i < index; ++i)
     {
+        if (!ptr)
+        {
+            break;
+        }
         ptr = ptr->next;
     }
 
