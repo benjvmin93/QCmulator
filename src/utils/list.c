@@ -88,6 +88,12 @@ size_t list_length(struct List *head)
 
 struct List *list_append(struct List *head, void *data)
 {
+    if (!head)
+    {
+        fprintf(stderr, "Given list is not properly initialized.");
+        return NULL;
+    }
+
     if (!head->data && head->next == NULL)
     {
         head->data = data;
