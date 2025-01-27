@@ -387,7 +387,7 @@ void test_measure(void)
     sv->data[0] = 1.;
     sv->data[1] = 0.;
     
-    sv = measure(sv, ZERO, 0);
+    sv = measure_single(sv, 0);
     
     CU_ASSERT(*sv->measurements[0] == false);
     free_statevec(sv);
@@ -397,7 +397,7 @@ void test_measure(void)
     sv->data[0] = 0.;
     sv->data[1] = 1.;
 
-    sv = measure(sv, ZERO, 0);
+    sv = measure_single(sv, 0);
     
     CU_ASSERT(*sv->measurements[0] == true);
     free_statevec(sv);
@@ -409,10 +409,10 @@ void test_measure(void)
     sv->data[2] = 0.;
     sv->data[3] = 1. / sqrt(2);
 
-    sv = measure(sv, ZERO, 0);
+    sv = measure_single(sv, 0);
     CU_ASSERT(sv->measurements[0] != NULL);
 
-    sv = measure(sv, ZERO, 1);
+    sv = measure_single(sv, 1);
     CU_ASSERT(sv->measurements[1] != NULL);
     CU_ASSERT_EQUAL(*sv->measurements[0], *sv->measurements[1]);
 

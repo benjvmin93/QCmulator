@@ -1,17 +1,29 @@
 #include "headers/circuit.h"
 #include "headers/alloc.h"
+#include "headers/projector.h"
 
 #include <stdio.h>
 
 struct Instruction *init_instruction(enum GATE gate_id, double *theta, struct List *targets)
-{
-    struct Gate *gate = init_gate(gate_id, theta);
-    size_t ntargets = list_length(targets);
-    if (gate->nqubits != ntargets)
+{   
+    struct Gate *gate = NULL;
+    if (gate_id == M)
     {
-        fprintf(stderr, "Can't initialize %s gate (%d qubit gate) with %ld targets.", gate_id_to_str(gate_id), gate->nqubits, ntargets);
-        free_gate(gate);
-        return NULL;
+        gate = xmalloc(sizeof(struct Gate));
+        gate->id = gate_id;
+        gate->nqubits = 1;
+        gate->data = get_data_from_proj_id(ZERO);
+    }
+    else
+    {
+        gate = init_gate(gate_id, theta);
+        size_t ntargets = list_length(targets);
+        if (gate->nqubits != ntargets)
+        {
+            fprintf(stderr, "Can't initialize %s gate (%d qubit gate) with %ld targets.", gate_id_to_str(gate_id), gate->nqubits, ntargets);
+            free_gate(gate);
+            return NULL;
+        }
     }
 
     struct Instruction *instruction = xmalloc(sizeof(struct Instruction));
@@ -62,7 +74,6 @@ struct Circuit *add_gate(struct Circuit *circuit, enum GATE gate_id, double *the
         return circuit;
     }
 
-    size_t ntargets = list_size(targets);
     struct Instruction *new_instruction = init_instruction(gate_id, theta, targets);
     circuit->instructions = list_append(circuit->instructions, new_instruction);
 
@@ -120,4 +131,16 @@ struct Circuit *ccx(struct Circuit *c, int q0, int q1, int q2)
 {
     void *t[] = { int_alloc(q0), int_alloc(q1), int_alloc(q2) };
     return add_gate(c, CCX, NULL, init_list_from_array(t, 3, sizeof(int)));
+}
+
+struct Circuit *measure(struct Circuit *c, int target)
+{
+    if (c == NULL)
+    {
+        fprintf(stderr, "Error: Circuit is NULL.\n");
+        return NULL;
+    }
+
+    void *t[] = { int_alloc(target) };
+    return add_gate(c, M, NULL, init_list_from_array(t, 1, sizeof(int)));
 }

@@ -233,6 +233,7 @@ struct Gate *get_nqubits_from_gate_id(struct Gate* gate)
     case RX:
     case RY:
     case RZ:
+    case M:
         nqubits =  1;
         break;
     case CX:

@@ -27,12 +27,12 @@ void print_statevec(struct Statevec *sv)
     }
 }
 
-void printBinary(int num) {
+void printBinary(int num)
+{
     for (int i = sizeof(int) * 8 - 1; i >= 0; i--)
     {
         printf("%d", (num >> i) & 1);
     }
-    printf("\n");
 }
 
 struct Statevec *init_statevec(unsigned char nqubits)
@@ -43,10 +43,10 @@ struct Statevec *init_statevec(unsigned char nqubits)
     }
 
     struct Statevec *sv = xmalloc(sizeof(struct Statevec));
-    sv->nqubits = nqubits;
-    sv->measurements = xcalloc(sizeof(bool *), nqubits);
     size_t size = 1 << nqubits;
     
+    sv->nqubits = nqubits;
+    sv->measurements = xcalloc(sizeof(bool *), nqubits);
     sv->data = xcalloc(sizeof(double complex), size);
     sv->data[0] = 1;
 
@@ -57,7 +57,7 @@ void free_statevec(struct Statevec *sv)
 {
     for (size_t i = 0; i < sv->nqubits; ++i)
     {
-        if (sv->measurements[i] != NULL)
+        if (sv->measurements[i])
         {
             free(sv->measurements[i]);
         }
@@ -118,7 +118,7 @@ struct Statevec *evolve(struct Statevec *sv, struct Gate *gate, struct List *tar
     while (tmp_targets)
     {
         int *target = tmp_targets->data;
-        mask |= (1 << (int) nqubits_sv - *target - 1);
+        mask |= (1 << ((int) nqubits_sv - *target - 1));
         tmp_targets = tmp_targets->next;
     }
 
@@ -131,7 +131,7 @@ struct Statevec *evolve(struct Statevec *sv, struct Gate *gate, struct List *tar
         for (int j = 0; j < (1 << nqubits_gate); ++j)
         {
             int maskJ = 0;
-            for (int t = 0; t < nTargets; ++t)
+            for (size_t t = 0; t < nTargets; ++t)
             {
                 int bit = (j >> (nTargets - t - 1)) & 1;
                 struct List *list_element = list_get(targets, t);
@@ -141,12 +141,12 @@ struct Statevec *evolve(struct Statevec *sv, struct Gate *gate, struct List *tar
             }
             int index = i_base | maskJ;
             int rowIndex = 0;
-            for (int t = 0; t < nTargets; ++t)
+            for (size_t t = 0; t < nTargets; ++t)
             {
                 struct List *list_element = list_get(targets, t);
                 int *target = list_element->data;
                 int bit = (i >> (nqubits_sv - *target - 1)) & 1;
-                bit = bit << nTargets - t - 1;
+                bit = bit << (nTargets - t - 1);
                 rowIndex |= bit;
             }
 
@@ -194,12 +194,12 @@ struct Statevec *normalize(struct Statevec *sv)
 struct Statevec *copy_statevec(struct Statevec *sv)
 {
     struct Statevec *sv_copy = init_statevec(sv->nqubits);
-    for (size_t i = 0; i < 1 << sv->nqubits; ++i)
+    for (int i = 0; i < 1 << sv->nqubits; ++i)
     {
         sv_copy->data[i] = sv->data[i];
     }
 
-    for (size_t i = 0; i < sv->nqubits; ++i)
+    for (int i = 0; i < sv->nqubits; ++i)
     {
         if (sv->measurements[i] != NULL)
         {
@@ -220,7 +220,7 @@ double complex expectation_proj(struct Statevec *sv, enum PROJECTOR proj, int ta
     free(p);
 
     double complex res = 0;
-    for (size_t i = 0; i < 1 << sv->nqubits; ++i)
+    for (int i = 0; i < 1 << sv->nqubits; ++i)
     {
         res += conj(sv->data[i]) * projected->data[i];
     }
@@ -235,14 +235,32 @@ double drand(double low, double high)
     return ((double)rand() * (high - low)) / (double)RAND_MAX + low;
 }
 
-struct Statevec *measure(struct Statevec *sv, enum PROJECTOR proj, int target)
+void print_measurements(int **measurements, unsigned char nqubits)
+{
+    size_t size = 1 << nqubits;
+    for (size_t i = 0; i < size; ++i)
+    {
+        printBinary(i);
+        if (!measurements[i])
+        {
+            printf(": NULL\n");
+        }
+        else
+        {
+            printf(": %d\n", *measurements[i]);
+        }
+
+    }
+}
+
+struct Statevec *measure_single(struct Statevec *sv, int target)
 {
     if (sv->measurements[target] != NULL)
     {
-        fprintf(stderr, "Qubit %d already measured.", target);
+        fprintf(stdout, "Qubit %d already measured.\n", target);
         return sv;
     }
-
+    enum PROJECTOR proj = ZERO;
     double prob = cabs(expectation_proj(sv, proj, target));
     double rand = drand(0., 1.);
     
@@ -258,4 +276,78 @@ struct Statevec *measure(struct Statevec *sv, enum PROJECTOR proj, int target)
     sv->measurements[target] = bool_alloc(proj == ONE ? true : false);
 
     return sv;
+}
+
+struct Statevec *run_from_circuit(struct Circuit *circuit)
+{
+    struct Statevec *sv = init_statevec(circuit->nqubits);
+    printf("Initial statevec:\n");
+    print_statevec(sv);
+    printf("===========================\n");
+    if (!sv)
+    {
+        return NULL;
+    }
+    struct List *instr = circuit->instructions;
+    while (instr)
+    {
+        struct Instruction *instructions = instr->data;
+        struct Gate *instr_gate = instructions->gate;
+        if (instr_gate->id >= ID && instr_gate->id <= RZ)
+        {
+            unsigned char *target = instructions->targets->data;
+            printf("Evolve single(%s: %d)\n", gate_id_to_str(instr_gate->id), *target);
+
+            sv = evolve_single(sv, instr_gate->data, *target);
+        }
+        else if (instr_gate->id >= RX && instr_gate->id <= RY)
+        {
+            printf("Evolve(%s: %d%d)\n", gate_id_to_str(instr_gate->id), *(int*)instructions->targets->data, *(int*)instructions->targets->next->data);
+            sv = evolve(sv, instructions->gate, instructions->targets);
+        }
+        else if (instr_gate->id == M)
+        {
+            unsigned char *target = instructions->targets->data;
+            printf("Measure(%d)\n", *target);
+            sv = measure_single(sv, *target);
+            sv = normalize(sv);
+            printf("\tResult: %d", (*sv->measurements[*target] == true ? 1 : 0));
+        }
+        instr = instr->next;
+        print_statevec(sv);
+        printf("===========================\n");
+    }
+
+    return sv;
+}
+
+int **simulate_circuit(struct Circuit *circuit, int shots)
+{   
+    size_t size = 1 << circuit->nqubits;
+    int **counts = xcalloc(sizeof(int *), size);
+    while (shots-- > 0)
+    {   
+        struct Statevec *sv = run_from_circuit(circuit);
+        int *result = xcalloc(sizeof(int), 1);
+        for (size_t i = 0; i < sv->nqubits; ++i)
+        {
+            if (!sv->measurements[i])
+            {
+                continue;
+            }
+            int bit_result = *sv->measurements[i] == true ? 1 : 0;
+            *result += bit_result << (sv->nqubits - i - 1);
+        }
+
+        if (!counts[*result])
+        {
+            counts[*result] = int_alloc(0);
+        }
+
+        *counts[*result] += 1;
+        free(result);
+        free_statevec(sv);
+    }
+
+    return counts;
 }

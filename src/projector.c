@@ -54,7 +54,6 @@ double complex *proj_ONE(void)
 
 double complex *get_data_from_proj_id(enum PROJECTOR proj)
 {
-    size_t size = 1 << get_nqubits_from_proj_id(proj);
     double complex *data = NULL;
     switch (proj)
     {

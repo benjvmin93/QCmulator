@@ -35,4 +35,6 @@ struct Circuit *cx(struct Circuit *c, int q0, int t);
 struct Circuit *cz(struct Circuit *c, int q0, int q2);
 struct Circuit *ccx(struct Circuit *c, int q0, int q1, int q2);
 
+struct Circuit *measure(struct Circuit *c, int target);
+
 #endif
