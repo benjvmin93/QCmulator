@@ -297,15 +297,14 @@ struct Statevec *run_from_circuit(struct Circuit *circuit)
         {
             unsigned char *target = instructions->targets->data;
             printf("Evolve single(%s: %d)\n", gate_id_to_str(instr_gate->id), *target);
-
             sv = evolve_single(sv, instr_gate->data, *target);
         }
-        else if (instr_gate->id >= RX && instr_gate->id <= RY)
+        if (instr_gate->id >= CX && instr_gate->id <= CCX)
         {
             printf("Evolve(%s: %d%d)\n", gate_id_to_str(instr_gate->id), *(int*)instructions->targets->data, *(int*)instructions->targets->next->data);
             sv = evolve(sv, instructions->gate, instructions->targets);
         }
-        else if (instr_gate->id == M)
+        if (instr_gate->id == M)
         {
             unsigned char *target = instructions->targets->data;
             printf("Measure(%d)\n", *target);
