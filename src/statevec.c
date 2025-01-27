@@ -281,9 +281,9 @@ struct Statevec *measure_single(struct Statevec *sv, int target)
 struct Statevec *run_from_circuit(struct Circuit *circuit)
 {
     struct Statevec *sv = init_statevec(circuit->nqubits);
-    printf("Initial statevec:\n");
-    print_statevec(sv);
-    printf("===========================\n");
+    // printf("Initial statevec:\n");
+    // print_statevec(sv);
+    // printf("===========================\n");
     if (!sv)
     {
         return NULL;
@@ -296,25 +296,25 @@ struct Statevec *run_from_circuit(struct Circuit *circuit)
         if (instr_gate->id >= ID && instr_gate->id <= RZ)
         {
             unsigned char *target = instructions->targets->data;
-            printf("Evolve single(%s: %d)\n", gate_id_to_str(instr_gate->id), *target);
+            // printf("Evolve single(%s: %d)\n", gate_id_to_str(instr_gate->id), *target);
             sv = evolve_single(sv, instr_gate->data, *target);
         }
         if (instr_gate->id >= CX && instr_gate->id <= CCX)
         {
-            printf("Evolve(%s: %d%d)\n", gate_id_to_str(instr_gate->id), *(int*)instructions->targets->data, *(int*)instructions->targets->next->data);
+            // printf("Evolve(%s: %d%d)\n", gate_id_to_str(instr_gate->id), *(int*)instructions->targets->data, *(int*)instructions->targets->next->data);
             sv = evolve(sv, instructions->gate, instructions->targets);
         }
         if (instr_gate->id == M)
         {
             unsigned char *target = instructions->targets->data;
-            printf("Measure(%d)\n", *target);
+            // printf("Measure(%d)\n", *target);
             sv = measure_single(sv, *target);
             sv = normalize(sv);
-            printf("\tResult: %d", (*sv->measurements[*target] == true ? 1 : 0));
+            // printf("\tResult: %d", (*sv->measurements[*target] == true ? 1 : 0));
         }
         instr = instr->next;
-        print_statevec(sv);
-        printf("===========================\n");
+        // print_statevec(sv);
+        // printf("===========================\n");
     }
 
     return sv;
@@ -324,8 +324,12 @@ int **simulate_circuit(struct Circuit *circuit, int shots)
 {   
     size_t size = 1 << circuit->nqubits;
     int **counts = xcalloc(sizeof(int *), size);
+    for (size_t i = 0; i < size; ++i)
+    {
+        counts[i] = int_alloc(0);
+    }
     while (shots-- > 0)
-    {   
+    {
         struct Statevec *sv = run_from_circuit(circuit);
         int *result = xcalloc(sizeof(int), 1);
         for (size_t i = 0; i < sv->nqubits; ++i)
@@ -337,12 +341,6 @@ int **simulate_circuit(struct Circuit *circuit, int shots)
             int bit_result = *sv->measurements[i] == true ? 1 : 0;
             *result += bit_result << (sv->nqubits - i - 1);
         }
-
-        if (!counts[*result])
-        {
-            counts[*result] = int_alloc(0);
-        }
-
         *counts[*result] += 1;
         free(result);
         free_statevec(sv);
