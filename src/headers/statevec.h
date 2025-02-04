@@ -5,6 +5,7 @@
 #include "list.h"
 #include "projector.h"
 #include "circuit.h"
+#include "alloc.h"
 
 #include <complex.h>
 #include <stdbool.h>
@@ -24,10 +25,12 @@ double complex expectation_proj(struct Statevec *sv, enum PROJECTOR proj, int ta
 struct Statevec *measure_single(struct Statevec *sv, int target);
 struct Statevec *evolve_single(struct Statevec *sv, double complex *gate, unsigned char target);
 struct Statevec *evolve(struct Statevec *sv, struct Gate *gate, struct List *targets);
-void print_statevec(struct Statevec *sv);
-int **simulate_circuit(struct Circuit *circuit, int shots);
+
+double **simulate_circuit(struct Circuit *circuit, int shots);
 struct Statevec *run_from_circuit(struct Circuit *circuit);
-void print_measurements(int **measurements, unsigned char nqubits);
-void printBinary(int num);
+
+void print_statevec(struct Statevec *sv);
+void print_measurements(double **measurements, unsigned char nqubits);
+void printBinary(int num, int bits);
 
 #endif

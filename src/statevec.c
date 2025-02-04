@@ -1,7 +1,4 @@
 #include "headers/statevec.h"
-#include "headers/alloc.h"
-#include "headers/gate.h"
-#include "headers/projector.h"
 
 #include <stdio.h>
 #include <math.h>
@@ -27,11 +24,12 @@ void print_statevec(struct Statevec *sv)
     }
 }
 
-void printBinary(int num)
+void printBinary(int num, int bits)
 {
-    for (int i = sizeof(int) * 8 - 1; i >= 0; i--)
+    for (int i = bits - 1; i >= 0; i--)
     {
-        printf("%d", (num >> i) & 1);
+        int bit = (num >> i) & 1;
+        printf("%d", bit);
     }
 }
 
@@ -231,25 +229,24 @@ double complex expectation_proj(struct Statevec *sv, enum PROJECTOR proj, int ta
 
 double drand(double low, double high)
 {
-    srand(time(NULL));
-    return ((double)rand() * (high - low)) / (double)RAND_MAX + low;
+    double random = ((double)rand() * (high - low)) / (double)RAND_MAX + low;
+    return random;
 }
 
-void print_measurements(int **measurements, unsigned char nqubits)
+void print_measurements(double **measurements, unsigned char nqubits)
 {
     size_t size = 1 << nqubits;
     for (size_t i = 0; i < size; ++i)
     {
-        printBinary(i);
+        printBinary(i, nqubits);
         if (!measurements[i])
         {
             printf(": NULL\n");
         }
         else
         {
-            printf(": %d\n", *measurements[i]);
+            printf(": %f\n", *measurements[i]);
         }
-
     }
 }
 
@@ -275,7 +272,7 @@ struct Statevec *measure_single(struct Statevec *sv, int target)
 
     sv->measurements[target] = bool_alloc(proj == ONE ? true : false);
 
-    return sv;
+    return normalize(sv);
 }
 
 struct Statevec *run_from_circuit(struct Circuit *circuit)
@@ -309,7 +306,6 @@ struct Statevec *run_from_circuit(struct Circuit *circuit)
             unsigned char *target = instructions->targets->data;
             // printf("Measure(%d)\n", *target);
             sv = measure_single(sv, *target);
-            sv = normalize(sv);
             // printf("\tResult: %d", (*sv->measurements[*target] == true ? 1 : 0));
         }
         instr = instr->next;
@@ -320,31 +316,84 @@ struct Statevec *run_from_circuit(struct Circuit *circuit)
     return sv;
 }
 
-int **simulate_circuit(struct Circuit *circuit, int shots)
-{   
-    size_t size = 1 << circuit->nqubits;
-    int **counts = xcalloc(sizeof(int *), size);
+double **get_measurement_count(struct Statevec *sv, struct List *measurements, int shots)
+{
+    size_t size = 1 << sv->nqubits;
+    double **counts = xcalloc(sizeof(double *), size);
     for (size_t i = 0; i < size; ++i)
     {
-        counts[i] = int_alloc(0);
+        counts[i] = double_alloc(0.);
     }
+
     while (shots-- > 0)
     {
-        struct Statevec *sv = run_from_circuit(circuit);
+        struct List *meas_tmp = measurements;
+        struct Statevec *tmp = copy_statevec(sv);
+        while (meas_tmp && meas_tmp->data)
+        {
+            int *target = meas_tmp->data;
+            tmp = measure_single(tmp, *target);
+            meas_tmp = meas_tmp->next;
+        }
+
         int *result = xcalloc(sizeof(int), 1);
         for (size_t i = 0; i < sv->nqubits; ++i)
         {
-            if (!sv->measurements[i])
+            if (!tmp->measurements[i])
             {
                 continue;
             }
-            int bit_result = *sv->measurements[i] == true ? 1 : 0;
-            *result += bit_result << (sv->nqubits - i - 1);
+            int bit_result = *tmp->measurements[i] == true ? 1 : 0;
+            
+            *result += bit_result << (tmp->nqubits - i - 1);
         }
         *counts[*result] += 1;
+
         free(result);
-        free_statevec(sv);
+        free_statevec(tmp);
+        // printf("Measure(%d)\n", *target);
     }
+
+    return counts;
+}
+
+double **simulate_circuit(struct Circuit *circuit, int shots)
+{   
+    struct List *measurements = init_list(sizeof(int), 0);
+    struct Statevec *sv = init_statevec(circuit->nqubits);
+    if (!sv)
+    {
+        return NULL;
+    }
+
+    struct List *instr = circuit->instructions;
+    while (instr)
+    {
+        struct Instruction *instruction = instr->data;
+        struct Gate *instr_gate = instruction->gate;
+        if (instr_gate->id >= ID && instr_gate->id <= RZ)
+        {
+            unsigned char *target = instruction->targets->data;
+            // printf("Evolve single(%s: %d)\n", gate_id_to_str(instr_gate->id), *target);
+            sv = evolve_single(sv, instr_gate->data, *target);
+        }
+        if (instr_gate->id >= CX && instr_gate->id <= CCX)
+        {
+            // printf("Evolve(%s: %d%d)\n", gate_id_to_str(instr_gate->id), *(int*)instructions->targets->data, *(int*)instructions->targets->next->data);
+            sv = evolve(sv, instruction->gate, instruction->targets);
+        }
+        if (instr_gate->id == M)
+        {
+            measurements = list_append(measurements, instruction->targets->data);
+        }
+        instr = instr->next;
+        // print_statevec(sv);
+        // printf("===========================\n");
+    }
+    
+    double **counts = get_measurement_count(sv, measurements, shots);
+    free_statevec(sv);
+    free_list(measurements);
 
     return counts;
 }
