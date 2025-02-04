@@ -1,11 +1,11 @@
 CC = gcc -std=c99
 AR = ar
-CFLAGS = -Wextra -Wall -pedantic
-LIBS = -lm
+CFLAGS = -Wextra -Wall -pedantic -L/home/benjamin/miniconda3/envs/qcmulator/lib -I/home/benjamin/miniconda3/envs/qcmulator/include/python3.9
+LIBS = -lm -lpython3.9
 LIBTEST = -lcunit
 
 # Source files
-FILES = main.c src/utils/*.c src/*.c
+FILES = python/qcmulator.c src/*.c src/utils/*.c
 UTIL_FILES = src/utils/alloc.c src/utils/list.c
 
 # Test files
@@ -15,36 +15,31 @@ LIST_TEST = ${UTIL_FILES} tests/test_list.c
 CIRCUIT_TEST = ${UTIL_FILES} src/gate.c src/projector.c src/circuit.c tests/test_circuit.c
 
 # Build targets
-LIB_NAME = libquantum.a
+LIB_SHARED = libquantum.so
 
-all: ${LIB_NAME} main
+all: ${LIB_SHARED}
 
 # Build the library
-${LIB_NAME}: ${UTIL_FILES}
-	${CC} ${CFLAGS} -c ${UTIL_FILES}
-	${AR} rcs ${LIB_NAME} alloc.o list.o
-
-# Build the main application using the library
-main: ${LIB_NAME} main.c src/*.c
-	${CC} ${CFLAGS} -o main main.c src/*.c -g ${LIB_NAME} ${LIBS}
+${LIB_SHARED}: ${FILES}
+	${CC} ${CFLAGS} -fPIC -shared -o ${LIB_SHARED} ${FILES} ${LIBS}
 
 # Tests
-test-statevec: ${LIB_NAME}
-	${CC} -fsanitize=address -o run-test-statevec -g ${STATEVEC_TEST} ${LIB_NAME} ${LIBTEST} ${LIBS}
+test-statevec: ${LIB_SHARED}
+	${CC} ${CFLAGS} -fsanitize=address -o run-test-statevec -g ${STATEVEC_TEST} ${LIB_SHARED} ${LIBTEST} ${LIBS}
 
-test-gate: ${LIB_NAME}
-	${CC} -fsanitize=address -o run-test-gate -g ${GATE_TEST} ${LIB_NAME} ${LIBTEST} ${LIBS}
+test-gate: ${LIB_SHARED}
+	${CC} ${CFLAGS} -fsanitize=address -o run-test-gate -g ${GATE_TEST} ${LIB_SHARED} ${LIBTEST} ${LIBS}
 
-test-list: ${LIB_NAME}
-	${CC} -fsanitize=address -o run-test-list -g ${LIST_TEST} ${LIB_NAME} ${LIBTEST} ${LIBS}
+test-list: ${LIB_SHARED}
+	${CC} ${CFLAGS} -fsanitize=address -o run-test-list -g ${LIST_TEST} ${LIB_SHARED} ${LIBTEST} ${LIBS}
 
-test-circuit: ${LIB_NAME}
-	${CC} -fsanitize=address -o run-test-circuit -g ${CIRCUIT_TEST} ${LIB_NAME} ${LIBTEST} ${LIBS}
+test-circuit: ${LIB_SHARED}
+	${CC} ${CFLAGS} -fsanitize=address -o run-test-circuit -g ${CIRCUIT_TEST} ${LIB_SHARED} ${LIBTEST} ${LIBS}
 
 # Debug build
-debug: ${LIB_NAME}
-	${CC} ${CFLAGS} -fsanitize=address -o dbg -g main.c src/*.c ${LIB_NAME} ${LIBS}
+debug: ${LIB_SHARED}
+	${CC} ${CFLAGS} -fsanitize=address -o dbg -g main.c src/*.c ${LIB_SHARED} ${LIBS}
 
 # Clean up
 clean:
-	rm -f main run-test-statevec run-test-gate run-test-list run-test-circuit dbg *.o ${LIB_NAME}
+	rm -f main run-test-statevec run-test-gate run-test-list run-test-circuit dbg *.so ${LIB_SHARED}
