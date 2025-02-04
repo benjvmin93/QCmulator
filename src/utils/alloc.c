@@ -43,3 +43,10 @@ bool *bool_alloc(bool a)
     *x = a;
     return x;
 }
+
+double *double_alloc(double a)
+{
+    double *x = xmalloc(sizeof(double));
+    *x = a;
+    return x;
+}

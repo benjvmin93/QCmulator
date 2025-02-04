@@ -9,5 +9,6 @@ void *xcalloc(size_t size, size_t nmemb);
 int *int_alloc(int a);
 unsigned char *uchar_alloc(unsigned char a);
 bool *bool_alloc(bool a);
+double *double_alloc(double a);
 
 #endif
